@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -365,6 +364,36 @@
         .hidden {
             display: none;
         }
+    
+        /* ==== 追加: シェア用エリアの最小スタイル ==== */
+        .share-box { display: grid; gap: 10px; }
+        .share-textarea {
+            width: 100%;
+            min-height: 90px;
+            resize: vertical;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95em;
+            line-height: 1.5;
+            background: #f8f9fa;
+        }
+        .copy-button {
+            justify-self: end;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .copy-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.35);
+        }
+        .copy-hint { font-size: 0.85em; color: #666; }
+
     </style>
 </head>
 <body>
@@ -438,115 +467,79 @@
                 </div>
             </div>
 
+            
+            <!-- 追加: この結果をシェアする -->
+            <div class="result-section" id="share-section">
+                <h3>この結果をシェアする</h3>
+                <div class="share-box">
+                    <textarea id="share-text" class="share-textarea" readonly aria-label="この結果をシェアする用テキスト"></textarea>
+                    <div class="copy-hint">Xに貼り付けてお使いください（ボタンでコピーできます）</div>
+                    <button class="copy-button" onclick="copyShare()">この結果をコピー</button>
+                </div>
+            </div>
+
             <button class="retry-button" onclick="location.reload()">もう一度診断する</button>
         </div>
     </div>
 
+    
     <script>
         const questions = [
             // 第1軸: G/L
-            {
-                axis: 'GL',
-                question: '配信中に技術的なトラブルが起きたとき、どうすることが多い?',
-                options: [
-                    { text: 'リスナーに「どうしたらいい?」と相談する', value: 'G' },
-                    { text: '自分で調べたり試行錯誤して解決する', value: 'L' }
-                ]
-            },
-            {
-                axis: 'GL',
-                question: 'イベント期間中のギフトについて、自分に近い考えは?',
-                options: [
-                    { text: 'リスナーが自然に応援してくれるのを待つ', value: 'G' },
-                    { text: '目標を掲げて「一緒に頑張ろう!」と呼びかける', value: 'L' }
-                ]
-            },
-            {
-                axis: 'GL',
-                question: '配信の雰囲気作りは主に誰が担っていると思う?',
-                options: [
-                    { text: 'リスナーのコメントやノリで決まることが多い', value: 'G' },
-                    { text: '自分のテンションや話題選びで引っ張っている', value: 'L' }
-                ]
-            },
+            { axis: 'GL', question: '配信中に技術的なトラブルが起きたとき、どうすることが多い?', options: [
+                { text: 'リスナーに「どうしたらいい?」と相談する', value: 'G' },
+                { text: '自分で調べたり試行錯誤して解決する', value: 'L' }
+            ]},
+            { axis: 'GL', question: 'イベント期間中のギフトについて、自分に近い考えは?', options: [
+                { text: 'リスナーが自然に応援してくれるのを待つ', value: 'G' },
+                { text: '目標を掲げて「一緒に頑張ろう!」と呼びかける', value: 'L' }
+            ]},
+            { axis: 'GL', question: '配信の雰囲気作りは主に誰が担っていると思う?', options: [
+                { text: 'リスナーのコメントやノリで決まることが多い', value: 'G' },
+                { text: '自分のテンションや話題選びで引っ張っている', value: 'L' }
+            ]},
             // 第2軸: F/I
-            {
-                axis: 'FI',
-                question: 'リスナーとの関係性で理想に近いのは?',
-                options: [
-                    { text: '友達みたいに気軽に話せる関係', value: 'F' },
-                    { text: '憧れや推しとして見てもらえる関係', value: 'I' }
-                ]
-            },
-            {
-                axis: 'FI',
-                question: '配信外でのリスナーとの交流(SNSのリプライなど)は?',
-                options: [
-                    { text: '積極的にカジュアルにやり取りする', value: 'F' },
-                    { text: 'ある程度距離を保って対応する', value: 'I' }
-                ]
-            },
-            {
-                axis: 'FI',
-                question: '自分の配信での「見せ方」について近いのは?',
-                options: [
-                    { text: '等身大の自分を見てもらいたい', value: 'F' },
-                    { text: '特別な存在として魅力的に見せたい', value: 'I' }
-                ]
-            },
+            { axis: 'FI', question: 'リスナーとの関係性で理想に近いのは?', options: [
+                { text: '友達みたいに気軽に話せる関係', value: 'F' },
+                { text: '憧れや推しとして見てもらえる関係', value: 'I' }
+            ]},
+            { axis: 'FI', question: '配信外でのリスナーとの交流(SNSのリプライなど)は?', options: [
+                { text: '積極的にカジュアルにやり取りする', value: 'F' },
+                { text: 'ある程度距離を保って対応する', value: 'I' }
+            ]},
+            { axis: 'FI', question: '自分の配信での「見せ方」について近いのは?', options: [
+                { text: '等身大の自分を見てもらいたい', value: 'F' },
+                { text: '特別な存在として魅力的に見せたい', value: 'I' }
+            ]},
             // 第3軸: C/P
-            {
-                axis: 'CP',
-                question: '普段の配信スタイルで当てはまるのは?',
-                options: [
-                    { text: 'その日の気分で自由に雑談する', value: 'C' },
-                    { text: '企画やテーマを決めて配信することが多い', value: 'P' }
-                ]
-            },
-            {
-                axis: 'CP',
-                question: 'ランクやイベント結果への思いは?',
-                options: [
-                    { text: '結果はあまり気にせずマイペースに楽しむ', value: 'C' },
-                    { text: '目標を立てて達成を目指したい', value: 'P' }
-                ]
-            },
-            {
-                axis: 'CP',
-                question: '配信のクオリティについて、自分に近いのは?',
-                options: [
-                    { text: '自然体で、流れに任せた配信が好き', value: 'C' },
-                    { text: 'サムネ・音質・構成などこだわって準備する', value: 'P' }
-                ]
-            },
+            { axis: 'CP', question: '普段の配信スタイルで当てはまるのは?', options: [
+                { text: 'その日の気分で自由に雑談する', value: 'C' },
+                { text: '企画やテーマを決めて配信することが多い', value: 'P' }
+            ]},
+            { axis: 'CP', question: 'ランクやイベント結果への思いは?', options: [
+                { text: '結果はあまり気にせずマイペースに楽しむ', value: 'C' },
+                { text: '目標を立てて達成を目指したい', value: 'P' }
+            ]},
+            { axis: 'CP', question: '配信のクオリティについて、自分に近いのは?', options: [
+                { text: '自然体で、流れに任せた配信が好き', value: 'C' },
+                { text: 'サムネ・音質・構成などこだわって準備する', value: 'P' }
+            ]},
             // 第4軸: O/S
-            {
-                axis: 'OS',
-                question: '理想的なリスナー層のイメージは?',
-                options: [
-                    { text: 'いつも来てくれる固定の仲間たち', value: 'S' },
-                    { text: 'たくさんの人に来てもらいたい', value: 'O' }
-                ]
-            },
-            {
-                axis: 'OS',
-                question: '新規リスナー獲得のための活動は?',
-                options: [
-                    { text: 'あまりしていない。自分の配信に集中したい', value: 'S' },
-                    { text: 'ウェルカム配信やSNS発信を積極的にしている', value: 'O' }
-                ]
-            },
-            {
-                axis: 'OS',
-                question: 'ギフトの支え方で実感があるのは?',
-                options: [
-                    { text: '特定の常連さんたちが中心に支えてくれている', value: 'S' },
-                    { text: '色々な人が少しずつ応援してくれている', value: 'O' }
-                ]
-            }
+            { axis: 'OS', question: '理想的なリスナー層のイメージは?', options: [
+                { text: 'いつも来てくれる固定の仲間たち', value: 'S' },
+                { text: 'たくさんの人に来てもらいたい', value: 'O' }
+            ]},
+            { axis: 'OS', question: '新規リスナー獲得のための活動は?', options: [
+                { text: 'あまりしていない。自分の配信に集中したい', value: 'S' },
+                { text: 'ウェルカム配信やSNS発信を積極的にしている', value: 'O' }
+            ]},
+            { axis: 'OS', question: 'ギフトの支え方で実感があるのは?', options: [
+                { text: '特定の常連さんたちが中心に支えてくれている', value: 'S' },
+                { text: '色々な人が少しずつ応援してくれている', value: 'O' }
+            ]}
         ];
 
-        const typeData = {
+const typeData = {
             'GFCO': {
                 name: 'ゆるふわ配信',
                 tagline: '居心地だけが武器。でもそれが最強',
@@ -756,7 +749,7 @@
                     '高単価ギフトが集中し、少人数でもランク維持が可能',
                     '熱狂的な推し活文化が形成され、FANBOX等の課金率が非常に高い',
                     '「選ばれた」という優越感でファンのロイヤリティが極めて高い',
-                    'ガチャ企画やイベントの進行がスムーズで企画の成功率が高い',
+                    'ガチャ企画やイベントの進行がスムーズで、毎回完売する',
                     'ブレない世界観で、長期的に安定したコミュニティが築ける'
                 ],
                 weaknesses: [
@@ -842,7 +835,7 @@
                     '「お金で繋がってる関係」という罪悪感に苛まれる',
                     '常に完璧を求められ、少しのミスも許されないプレッシャー',
                     'ガチ恋・依存トラブルが深刻化し、逃げ場がなくなる',
-                    '新規が入れず、コアなファンが離脱したら一気に終わる'
+                    '新規が入れず、ファンが高齢化・離脱したら一気に終わる'
                 ],
                 advice: [
                     'ファンへの依存度を下げるため、少しずつ新規獲得も視野に入れる',
@@ -995,7 +988,7 @@
                 ],
                 weaknesses: [
                     '失敗時、全責任を背負い込んで病む',
-                    'メンバーへの依存度が高すぎて、コアメンバーが1人抜けると崩壊',
+                    'メンバーへの依存度が高すぎて、1人抜けると崩壊',
                     'プレッシャーで押し潰されそうになる',
                     '「楽しむ」より「達成」が目的化し、疲弊する',
                     '新規が入れず、成長の上限が見えている'
@@ -1161,7 +1154,7 @@
                     '人に頼ることも必要、一人で抱え込まない',
                     '孤独を恐れず、でも助けを求める勇気も',
                     '自分を追い詰めすぎず、休む時は休む',
-                    'メンタルヘルスを最優先に、時にはメンケアしてもらう事も検討'
+                    'メンタルヘルスを最優先に、専門家のサポートも検討'
                 ],
                 rank: 5,
                 difficulty: 5,
@@ -1174,6 +1167,7 @@
         };
 
         let currentQuestion = 0;
+        const answersByQuestion = {}; // 各質問の選択を保持（軸ごとの集計のズレ防止）
         let answers = {
             GL: { G: 0, L: 0 },
             FI: { F: 0, I: 0 },
@@ -1191,85 +1185,57 @@
         function renderQuestions() {
             const container = document.getElementById('questions-container');
             container.innerHTML = '';
-
             questions.forEach((q, index) => {
                 const questionDiv = document.createElement('div');
-                questionDiv.className = 'question-container';
-                if (index === 0) questionDiv.classList.add('active');
-
+                questionDiv.className = 'question-container' + (index === 0 ? ' active' : '');
                 questionDiv.innerHTML = `
                     <div class="question-number">質問 ${index + 1} / ${questions.length}</div>
                     <div class="question-text">${q.question}</div>
                     <div class="options">
-                        ${q.options.map((opt, optIndex) => `
-                            <div class="option" onclick="selectOption(${index}, '${opt.value}', this)">
+                        ${q.options.map((opt) => `
+                            <div class="option" data-axis="${q.axis}" data-value="${opt.value}" onclick="selectOption(${index}, '${opt.value}', this)">
                                 ${opt.text}
                             </div>
                         `).join('')}
                     </div>
                 `;
-
                 container.appendChild(questionDiv);
             });
         }
 
         function selectOption(questionIndex, value, element) {
-            // 同じ質問の他の選択肢の選択状態を解除
             const questionDiv = element.closest('.question-container');
-            questionDiv.querySelectorAll('.option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-
-            // 選択した選択肢をマーク
+            questionDiv.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
             element.classList.add('selected');
 
-            // 回答を記録
             const axis = questions[questionIndex].axis;
-            const axisKey = axis === 'GL' ? 'GL' : axis === 'FI' ? 'FI' : axis === 'CP' ? 'CP' : 'OS';
-            
-            // 前の回答をクリア
-            Object.keys(answers[axisKey]).forEach(key => {
-                if (answers[axisKey][key] > 0) {
-                    // この質問の前の回答を探して減らす
-                    const prevAnswer = questions[questionIndex].options.find(opt => 
-                        answers[axisKey][opt.value] > 0
-                    );
-                    if (prevAnswer) {
-                        answers[axisKey][prevAnswer.value]--;
-                    }
-                }
-            });
+            // 以前の選択があればカウントを戻す
+            if (answersByQuestion[questionIndex]) {
+                const prevAxis = answersByQuestion[questionIndex].axis;
+                const prevVal = answersByQuestion[questionIndex].value;
+                answers[prevAxis][prevVal] = Math.max(0, (answers[prevAxis][prevVal] || 0) - 1);
+            }
+            // 新しい選択を記録
+            answersByQuestion[questionIndex] = { axis, value };
+            answers[axis][value] = (answers[axis][value] || 0) + 1;
 
-            // 新しい回答を記録
-            answers[axisKey][value]++;
-
-            // 次へボタンを有効化
             document.getElementById('next-btn').disabled = false;
         }
 
         function nextQuestion() {
             const questionContainers = document.querySelectorAll('.question-container');
-            
             if (currentQuestion < questions.length - 1) {
                 questionContainers[currentQuestion].classList.remove('active');
                 currentQuestion++;
                 questionContainers[currentQuestion].classList.add('active');
                 updateProgress();
-                
-                // 次の質問がすでに回答済みかチェック
                 const nextSelected = questionContainers[currentQuestion].querySelector('.option.selected');
                 document.getElementById('next-btn').disabled = !nextSelected;
             } else {
-                // 最後の質問なので結果を表示
                 showResult();
             }
-
-            // 戻るボタンの表示制御
             document.getElementById('prev-btn').style.display = currentQuestion > 0 ? 'block' : 'none';
-            
-            // 最後の質問では「次へ」を「結果を見る」に変更
-            const nextBtn = document.getElementById('next-btn');
-            nextBtn.textContent = currentQuestion === questions.length - 1 ? '結果を見る' : '次へ';
+            document.getElementById('next-btn').textContent = currentQuestion === questions.length - 1 ? '結果を見る' : '次へ';
         }
 
         function prevQuestion() {
@@ -1279,13 +1245,10 @@
                 currentQuestion--;
                 questionContainers[currentQuestion].classList.add('active');
                 updateProgress();
-
-                // 前の質問の回答状態を確認
                 const prevSelected = questionContainers[currentQuestion].querySelector('.option.selected');
                 document.getElementById('next-btn').disabled = !prevSelected;
                 document.getElementById('next-btn').textContent = '次へ';
             }
-
             document.getElementById('prev-btn').style.display = currentQuestion > 0 ? 'block' : 'none';
         }
 
@@ -1295,82 +1258,105 @@
         }
 
         function calculateResult() {
+            const axes = { GL: 'G', FI: 'F', CP: 'C', OS: 'O' };
             let result = '';
-
-            // 各軸で多い方を選択
-            result += answers.GL.G >= answers.GL.L ? 'G' : 'L';
-            result += answers.FI.F >= answers.FI.I ? 'F' : 'I';
-            result += answers.CP.C >= answers.CP.P ? 'C' : 'P';
-            result += answers.OS.O >= answers.OS.S ? 'O' : 'S';
-
+            result += (answers.GL.G >= answers.GL.L) ? 'G' : 'L';
+            result += (answers.FI.F >= answers.FI.I) ? 'F' : 'I';
+            result += (answers.CP.C >= answers.CP.P) ? 'C' : 'P';
+            result += (answers.OS.O >= answers.OS.S) ? 'O' : 'S';
             return result;
         }
 
         function showResult() {
             const resultType = calculateResult();
-            const data = typeData[resultType];
+            const data = (typeData && typeData[resultType]) ? typeData[resultType] : null;
 
             document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('result-screen').style.display = 'block';
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.style.display = 'block';
 
-            // 結果の表示
             document.getElementById('result-code').textContent = resultType;
-            document.getElementById('result-name').textContent = data.name;
-            document.getElementById('result-tagline').textContent = data.tagline;
+            document.getElementById('result-name').textContent = data ? data.name : '';
+            document.getElementById('result-tagline').textContent = data ? data.tagline : '';
 
-            // 統計情報
             const stars = (num) => '★'.repeat(num) + '☆'.repeat(5 - num);
-            document.getElementById('result-stats').innerHTML = `
-                <div class="stat-item">
-                    <div class="stat-label">ランクの上がりやすさ</div>
-                    <div class="stat-value">${stars(data.rank)}</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">配信難易度</div>
-                    <div class="stat-value">${stars(data.difficulty)}</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">成長の速さ</div>
-                    <div class="stat-value">${data.growth}</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">病みやすさ</div>
-                    <div class="stat-value">${stars(data.burnout)}</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">配信の大変さ</div>
-                    <div class="stat-value">${stars(data.hardship)}</div>
-                </div>
-            `;
 
-            // 特徴
-            document.getElementById('result-features').innerHTML = 
-                data.features.map(f => `<li>${f}</li>`).join('');
+            if (data) {
+                document.getElementById('result-stats').innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-label">ランクの上がりやすさ</div>
+                        <div class="stat-value">${stars(data.rank)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">配信難易度</div>
+                        <div class="stat-value">${stars(data.difficulty)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">成長の速さ</div>
+                        <div class="stat-value">${data.growth}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">病みやすさ</div>
+                        <div class="stat-value">${stars(data.burnout)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">配信の大変さ</div>
+                        <div class="stat-value">${stars(data.hardship)}</div>
+                    </div>
+                `;
+                document.getElementById('result-features').innerHTML = (data.features || []).map(f => `<li>${f}</li>`).join('');
+                document.getElementById('result-strengths').innerHTML = (data.strengths || []).map(s => `<li>${s}</li>`).join('');
+                document.getElementById('result-weaknesses').innerHTML = (data.weaknesses || []).map(w => `<li>${w}</li>`).join('');
+                document.getElementById('result-advice').innerHTML = (data.advice || []).map(a => `<li>${a}</li>`).join('');
 
-            // 強み
-            document.getElementById('result-strengths').innerHTML = 
-                data.strengths.map(s => `<li>${s}</li>`).join('');
+                const getTypeName = (code) => (typeData && typeData[code]) ? `${code}(${typeData[code].name})` : code;
+                document.getElementById('result-good-compatibility').innerHTML = (data.goodCompatibility || []).map(c => getTypeName(c)).join('、');
+                document.getElementById('result-bad-compatibility').innerHTML  = (data.badCompatibility  || []).map(c => getTypeName(c)).join('、');
 
-            // 弱み
-            document.getElementById('result-weaknesses').innerHTML = 
-                data.weaknesses.map(w => `<li>${w}</li>`).join('');
-
-            // アドバイス
-            document.getElementById('result-advice').innerHTML = 
-                data.advice.map(a => `<li>${a}</li>`).join('');
-
-            // 相性
-            const getTypeName = (code) => typeData[code] ? `${code}(${typeData[code].name})` : code;
-            
-            document.getElementById('result-good-compatibility').innerHTML = 
-                data.goodCompatibility.map(c => getTypeName(c)).join('、');
-            
-            document.getElementById('result-bad-compatibility').innerHTML = 
-                data.badCompatibility.map(c => getTypeName(c)).join('、');
-
-            // ページトップにスクロール
+                // 共有テキスト
+                const featureOneLine = (data.features && data.features.length > 0) ? data.features[0] : '';
+                const share = `[IRIAMライバー16タイプ診断] 結果: ${resultType} ${data.name} — ${data.tagline} ／ 特徴: ${featureOneLine} ／ 診断はこちら→ https://rinne-iriam.github.io/IRIAM16Type/`;
+                const shareEl = document.getElementById('share-text');
+                if (shareEl) shareEl.value = share;
+            } else {
+                // データが見つからない場合でも画面は出す
+                document.getElementById('result-stats').innerHTML = '';
+                document.getElementById('result-features').innerHTML = '';
+                document.getElementById('result-strengths').innerHTML = '';
+                document.getElementById('result-weaknesses').innerHTML = '';
+                document.getElementById('result-advice').innerHTML = '';
+                document.getElementById('result-good-compatibility').innerHTML = '';
+                document.getElementById('result-bad-compatibility').innerHTML = '';
+                const shareEl = document.getElementById('share-text');
+                if (shareEl) shareEl.value = `[IRIAMライバー16タイプ診断] 結果: ${resultType} ／ 診断はこちら→ https://rinne-iriam.github.io/IRIAM16Type/`;
+            }
             window.scrollTo(0, 0);
         }
+
+        function copyShare() {
+            const el = document.getElementById('share-text');
+            if (!el) return;
+            const text = el.value || '';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => toastCopy()).catch(() => fallbackCopy(el));
+            } else {
+                fallbackCopy(el);
+            }
+        }
+        function fallbackCopy(el) {
+            el.select();
+            el.setSelectionRange(0, el.value.length);
+            const ok = document.execCommand('copy');
+            if (ok) toastCopy();
+        }
+        function toastCopy() {
+            const btn = document.querySelector('.copy-button');
+            if (!btn) return;
+            const original = btn.textContent;
+            btn.textContent = 'コピーしました';
+            setTimeout(() => { btn.textContent = original; }, 1500);
+        }
     </script>
+
 </body>
 </html>
