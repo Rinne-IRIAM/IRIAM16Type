@@ -1,90 +1,1376 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Progate</title>
-  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRIAMライバー16タイプ診断</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            display: none;
+        }
+
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            color: #764ba2;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #start-screen {
+            text-align: center;
+        }
+
+        #start-screen h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        #start-screen p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 50px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        #result-screen {
+            display: none;
+        }
+
+        .result-type {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-code {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-name {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .result-tagline {
+            font-size: 1.2em;
+            color: #764ba2;
+            font-style: italic;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+        }
+
+        .result-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .result-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .result-section li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .result-section li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .compatibility {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .compatibility-good, .compatibility-bad {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .compatibility-good {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+
+        .compatibility-bad {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+
+        .compatibility h4 {
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .compatibility-good h4 {
+            color: #2e7d32;
+        }
+
+        .compatibility-bad h4 {
+            color: #c62828;
+        }
+
+        .retry-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .question-text {
+                font-size: 1.1em;
+            }
+
+            .compatibility {
+                flex-direction: column;
+            }
+
+            .result-code {
+                font-size: 2em;
+            }
+
+            .result-name {
+                font-size: 1.5em;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <header>
     <div class="container">
-      <div class="header-left">
-        <img class="logo" src="https://prog-8.com/images/html/advanced/main_logo.png">
-      </div>
-      <span class="fa fa-bars menu-icon"></span>
-      <div class="header-right">
-        <a href="#">レッスン</a>
-        <a href="#">新規登録</a>
-        <a href="#" class="login">ログイン</a>
-      </div>
-    </div>
-  </header>
-  <div class="top-wrapper">
-    <div class="container">
-      <h1>LEARN TO CODE.<br>LEARN TO BE CREATIVE.</h1>
-      <p>Progateはオンラインプログラミング学習サービスです。<br>初心者にもやさしいスライドとレッスンで、ウェブサービスを作りながらプログラミングを学んでいきましょう。</p>
-      <div class="btn-wrapper">
-        <a href="#" class="btn signup">新規登録はこちら</a>
-        <p>or</p>
-        <a href="#" class="btn facebook"><span class="fa fa-facebook"></span>Facebookで登録</a>
-        <a href="#" class="btn twitter"><span class="fa fa-twitter"></span>Twitterで登録</a>
-      </div>
-    </div>
-  </div>
-  <div class="lesson-wrapper">
-    <div class="container">
-      <div class="heading">
-        <h2>Learn Where to Get Started!</h2>
-      </div>
-      <div class="lessons">
-        <div class="lesson">
-          <div class="lesson-icon">
-            <img src="https://prog-8.com/images/html/advanced/html.png">
-            <p>HTML & CSS</p>
-          </div>
-          <p class="text-contents">ウェブページの作成に使用される言語です。HTMLとCSSを組み合わせることで、静的なページを作り上げることができます。</p>
+        <!-- スタート画面 -->
+        <div id="start-screen" class="card">
+            <h1>IRIAMライバー16タイプ診断</h1>
+            <p>
+                あなたの配信スタイルを分析して、16タイプに分類します。<br>
+                全12問の質問に答えてください。<br>
+                所要時間：約3分
+            </p>
+            <button class="start-button" onclick="startQuiz()">診断を始める</button>
         </div>
-        <div class="lesson">
-          <div class="lesson-icon">
-            <img src="https://prog-8.com/images/html/advanced/jQuery.png">
-            <p>jQuery</p>
-          </div>
-          <p class="text-contents">素敵な動きを手軽に実装できるJavaScriptライブラリです。 アニメーション効果をつけたり、Ajax（エイジャックス）を使って外部ファイルを読み込んだりと色々なことができます。</p>
+
+        <!-- 質問画面 -->
+        <div id="quiz-screen" class="card hidden">
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+
+            <div id="questions-container"></div>
+
+            <div class="buttons">
+                <button class="btn-secondary" id="prev-btn" onclick="prevQuestion()">戻る</button>
+                <button class="btn-primary" id="next-btn" onclick="nextQuestion()" disabled>次へ</button>
+            </div>
         </div>
-        <div class="lesson">
-          <div class="lesson-icon">
-            <img src="https://prog-8.com/images/html/advanced/ruby.png">
-            <p>Ruby</p>
-          </div>
-          <p class="text-contents">オープンソースの動的なプログラミング言語で、 シンプルさと高い生産性を備えています。大きなWebアプリケーションから小さな日用ツールまで、さまざまなソフトウェアを作ることができます。</p>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="card">
+            <div class="result-type">
+                <div class="result-code" id="result-code"></div>
+                <div class="result-name" id="result-name"></div>
+                <div class="result-tagline" id="result-tagline"></div>
+            </div>
+
+            <div class="stats" id="result-stats"></div>
+
+            <div class="result-section">
+                <h3>特徴</h3>
+                <ul id="result-features"></ul>
+            </div>
+
+            <div class="result-section">
+                <h3>強み</h3>
+                <ul id="result-strengths"></ul>
+            </div>
+
+            <div class="result-section">
+                <h3>弱み</h3>
+                <ul id="result-weaknesses"></ul>
+            </div>
+
+            <div class="result-section">
+                <h3>アドバイス・心がけたいこと</h3>
+                <ul id="result-advice"></ul>
+            </div>
+
+            <div class="result-section">
+                <h3>相性</h3>
+                <div class="compatibility">
+                    <div class="compatibility-good">
+                        <h4>相性の良いタイプ</h4>
+                        <div id="result-good-compatibility"></div>
+                    </div>
+                    <div class="compatibility-bad">
+                        <h4>相性の悪いタイプ</h4>
+                        <div id="result-bad-compatibility"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="retry-button" onclick="location.reload()">もう一度診断する</button>
         </div>
-        <div class="lesson">
-          <div class="lesson-icon">
-            <img src="https://prog-8.com/images/html/advanced/php.png">
-            <p>PHP</p>
-          </div>
-          <p class="text-contents">HTMLだけではページの内容を変えることはできません。PHPはHTMLにプログラムを埋め込み、それを可能にします。</p>
-        </div>
-      </div>
-      <div class="clear"></div>
     </div>
-  </div>
-  <div class="message-wrapper">
-    <div class="container">
-      <div class="heading">
-        <h2>さぁ、あなたもProgateでプログラミングを学んでみませんか?</h2>
-        <h3>Let's learn to code, learn to be creative!</h3>
-      </div>
-      <span class="btn message">さっそく開発する</span>
-    </div>
-  </div>
-  <footer>
-    <div class="container">
-      <img src="https://prog-8.com/images/html/advanced/footer_logo.png">
-      <p>Learn to Code, Learn to be Creative.</p>
-    </div>
-  </footer>
+
+    <script>
+        const questions = [
+            // 第1軸: G/L
+            {
+                axis: 'GL',
+                question: '配信中に技術的なトラブルが起きたとき、どうすることが多い?',
+                options: [
+                    { text: 'リスナーに「どうしたらいい?」と相談する', value: 'G' },
+                    { text: '自分で調べたり試行錯誤して解決する', value: 'L' }
+                ]
+            },
+            {
+                axis: 'GL',
+                question: 'イベント期間中のギフトについて、自分に近い考えは?',
+                options: [
+                    { text: 'リスナーが自然に応援してくれるのを待つ', value: 'G' },
+                    { text: '目標を掲げて「一緒に頑張ろう!」と呼びかける', value: 'L' }
+                ]
+            },
+            {
+                axis: 'GL',
+                question: '配信の雰囲気作りは主に誰が担っていると思う?',
+                options: [
+                    { text: 'リスナーのコメントやノリで決まることが多い', value: 'G' },
+                    { text: '自分のテンションや話題選びで引っ張っている', value: 'L' }
+                ]
+            },
+            // 第2軸: F/I
+            {
+                axis: 'FI',
+                question: 'リスナーとの関係性で理想に近いのは?',
+                options: [
+                    { text: '友達みたいに気軽に話せる関係', value: 'F' },
+                    { text: '憧れや推しとして見てもらえる関係', value: 'I' }
+                ]
+            },
+            {
+                axis: 'FI',
+                question: '配信外でのリスナーとの交流(SNSのリプライなど)は?',
+                options: [
+                    { text: '積極的にカジュアルにやり取りする', value: 'F' },
+                    { text: 'ある程度距離を保って対応する', value: 'I' }
+                ]
+            },
+            {
+                axis: 'FI',
+                question: '自分の配信での「見せ方」について近いのは?',
+                options: [
+                    { text: '等身大の自分を見てもらいたい', value: 'F' },
+                    { text: '特別な存在として魅力的に見せたい', value: 'I' }
+                ]
+            },
+            // 第3軸: C/P
+            {
+                axis: 'CP',
+                question: '普段の配信スタイルで当てはまるのは?',
+                options: [
+                    { text: 'その日の気分で自由に雑談する', value: 'C' },
+                    { text: '企画やテーマを決めて配信することが多い', value: 'P' }
+                ]
+            },
+            {
+                axis: 'CP',
+                question: 'ランクやイベント結果への思いは?',
+                options: [
+                    { text: '結果はあまり気にせずマイペースに楽しむ', value: 'C' },
+                    { text: '目標を立てて達成を目指したい', value: 'P' }
+                ]
+            },
+            {
+                axis: 'CP',
+                question: '配信のクオリティについて、自分に近いのは?',
+                options: [
+                    { text: '自然体で、流れに任せた配信が好き', value: 'C' },
+                    { text: 'サムネ・音質・構成などこだわって準備する', value: 'P' }
+                ]
+            },
+            // 第4軸: O/S
+            {
+                axis: 'OS',
+                question: '理想的なリスナー層のイメージは?',
+                options: [
+                    { text: 'いつも来てくれる固定の仲間たち', value: 'S' },
+                    { text: 'たくさんの人に来てもらいたい', value: 'O' }
+                ]
+            },
+            {
+                axis: 'OS',
+                question: '新規リスナー獲得のための活動は?',
+                options: [
+                    { text: 'あまりしていない。自分の配信に集中したい', value: 'S' },
+                    { text: 'ウェルカム配信やSNS発信を積極的にしている', value: 'O' }
+                ]
+            },
+            {
+                axis: 'OS',
+                question: 'ギフトの支え方で実感があるのは?',
+                options: [
+                    { text: '特定の常連さんたちが中心に支えてくれている', value: 'S' },
+                    { text: '色々な人が少しずつ応援してくれている', value: 'O' }
+                ]
+            }
+        ];
+
+        const typeData = {
+            'GFCO': {
+                name: 'ゆるふわ配信',
+                tagline: '居心地だけが武器。でもそれが最強',
+                features: [
+                    'リスナー主導で自然に配信が進む',
+                    '予定を立てず、流れに任せる自由なスタイル',
+                    '誰でもウェルカムな開かれたコミュニティ',
+                    'リスナー同士も仲良くなりやすい温かい雰囲気',
+                    'ギフトもランクも強制せず、純粋に楽しむ'
+                ],
+                strengths: [
+                    '配信のプレッシャーがほぼゼロで、何年でも続けられる',
+                    'リスナーが自発的に盛り上げてくれるので、トーク力に自信がなくても大丈夫',
+                    '「いつもの場所」として定着すれば、毎日来てくれる常連が自然に増える',
+                    '配信時間や頻度が不規則でも許される、ストレスフリーな環境',
+                    '長期的な視点で見ると、離脱率が低く安定したコミュニティが形成される'
+                ],
+                weaknesses: [
+                    'イベント時に「頑張って」と言われても、頑張り方がわからない',
+                    'ランクが上がらず、周りと比較して劣等感を感じがち',
+                    'ギフトをお願いできず、「申し訳なさ」が積み重なる',
+                    '気づけば1年経っても同じ場所にいて、焦りだけが募る',
+                    '「このままでいいのか」という不安が、ふとした瞬間に襲ってくる'
+                ],
+                advice: [
+                    'ランクを気にしすぎない。居心地の良さが最大の武器だと自信を持って',
+                    '定期的な配信で「いつもの時間」を作ると、さらに定着率が上がる',
+                    'たまには小さな目標を立ててみると、新鮮な刺激になる',
+                    '「何もしてない」ではなく、「居場所を提供している」価値を認識する',
+                    '自分も心から楽しむことが、一番大切'
+                ],
+                rank: 2,
+                difficulty: 1,
+                growth: '序盤型',
+                burnout: 1,
+                hardship: 1,
+                goodCompatibility: ['GFCS', 'LFCO', 'GFPO'],
+                badCompatibility: ['LIPS', 'LICS', 'GIPS']
+            },
+            'GFCS': {
+                name: '仲良しグループ',
+                tagline: '家族のような、かけがえのない絆',
+                features: [
+                    '固定メンバー中心の深い信頼関係',
+                    '内輪ネタが豊富で、共通の思い出が積み重なる',
+                    'リスナーが献身的に配信を支えてくれる',
+                    '家族や親友のような、特別な関係性',
+                    '配信外での交流も活発'
+                ],
+                strengths: [
+                    '精神的な支えになる仲間がいて、配信のモチベーションが保ちやすい',
+                    'リスナーの献身的なサポートで、困った時も必ず助けてくれる',
+                    '深い信頼関係があるので、本音で話せる',
+                    '配信が「義務」ではなく「楽しい集まり」として成立する',
+                    '長期的な継続がしやすく、何年も同じメンバーで続けられる'
+                ],
+                weaknesses: [
+                    '新規が入れない空気感で、成長が完全にストップ',
+                    '固定メンバーが1人抜けると、枠全体が崩壊する危険性',
+                    '「この人たち、私がいなくても楽しそう」と孤独を感じる瞬間',
+                    'ランクイベントで他の枠を見て、自分の限界を突きつけられる',
+                    '内輪ノリで排他的に見えて、外部から批判されることも'
+                ],
+                advice: [
+                    '月に1回は「新規歓迎配信」をして、コミュニティに新しい風を入れる',
+                    '仲間を大切にしつつ、閉鎖的になりすぎないバランスを意識',
+                    'リスナーへの感謝を言葉で伝える習慣をつける',
+                    '固定メンバーが離れることを恐れすぎず、変化を受け入れる柔軟性',
+                    '「成長しなくてもいい」と割り切ることも大切'
+                ],
+                rank: 2,
+                difficulty: 1,
+                growth: '序盤型',
+                burnout: 2,
+                hardship: 1,
+                goodCompatibility: ['GFCO', 'GFPS', 'LFCS'],
+                badCompatibility: ['LIPO', 'LFPO', 'GIPO']
+            },
+            'GFPO': {
+                name: 'お祭り会場',
+                tagline: 'みんなで作る、楽しいお祭り',
+                features: [
+                    'リスナーが積極的に企画に参加・提案',
+                    'ワイワイガヤガヤとした賑やかな雰囲気',
+                    '幅広い層が集まり、多様性がある',
+                    'イベントやコラボが自然発生',
+                    '民主的で開かれたコミュニティ'
+                ],
+                strengths: [
+                    'イベント時にリスナーが自発的に動いてくれて、ギフトが自然に集まる',
+                    '企画のネタ切れがなく、常に新鮮で飽きない配信ができる',
+                    'リスナー同士が仲良くなり、コミュニティが自然に拡大していく',
+                    '配信準備の負担が軽く、ライバーは楽しむことに集中できる',
+                    '盛り上がりやすく、配信が毎回楽しみになる'
+                ],
+                weaknesses: [
+                    'イベント後の虚無感が半端なく、通常配信が物足りなくなる',
+                    'リスナー任せで「自分は何もしてない」罪悪感に襲われる',
+                    '盛り上げ続けないと人が離れる恐怖で、休めない',
+                    '誰が主役かわからなくなり、ライバー自身の存在意義に悩む',
+                    'コントロールが効かず、予想外の方向に行って困ることも'
+                ],
+                advice: [
+                    'イベント後は意識的に休息を取り、燃え尽きを防ぐ',
+                    '通常配信も大切にして、日常の楽しさを見失わない',
+                    'リスナー任せにしすぎず、時には自分から企画を提案する',
+                    '盛り上がりに流されず、自分のペースを見失わない',
+                    'ON/OFFの切り替えを意識し、配信外の時間も大切に'
+                ],
+                rank: 3,
+                difficulty: 3,
+                growth: '中盤型',
+                burnout: 3,
+                hardship: 3,
+                goodCompatibility: ['GFCO', 'LFPO', 'GIPO'],
+                badCompatibility: ['GICS', 'LICS', 'GFCS']
+            },
+            'GFPS': {
+                name: '秘密の隠れ家',
+                tagline: '信頼できる仲間との、特別なプロジェクト',
+                features: [
+                    '少数精鋭のチーム感覚',
+                    'リスナーと一体となって目標達成を目指す',
+                    '計画的な企画運営',
+                    '深い信頼関係に基づく協力',
+                    '外からは見えにくい特別な空間'
+                ],
+                strengths: [
+                    '目標達成時の一体感と達成感が何物にも代えがたい',
+                    '計画的にギフトが集まり、ランクも安定して上がる',
+                    'リスナーの「自分が支えている」実感が強く、離脱率が低い',
+                    '少人数でも効率良く高ランクを維持できる',
+                    '深い絆が生まれ、配信外でも助け合える関係になる'
+                ],
+                weaknesses: [
+                    '目標未達成時、全員が空気重くなって気まずい',
+                    'リスナーへの依存度が高すぎて、「お願い」が言えなくなる',
+                    'メンバーの誰かが抜けると、計画が総崩れする脆さ',
+                    '「楽しむ」より「達成する」が優先され、疲弊していく',
+                    '新規が入れず、成長の限界が早く来る'
+                ],
+                advice: [
+                    '目標は現実的に設定し、達成できなくても責めない文化を作る',
+                    'たまには目標のない、ただ楽しむだけの配信も入れる',
+                    'リスナーへの依存に気づいたら、意識的に距離を調整する',
+                    '失敗を恐れすぎず、挑戦することそのものを楽しむ',
+                    'メンバーへの感謝を定期的に伝え、絆を強化する'
+                ],
+                rank: 3,
+                difficulty: 3,
+                growth: '序盤型',
+                burnout: 3,
+                hardship: 3,
+                goodCompatibility: ['GFCS', 'LFPS', 'GIPS'],
+                badCompatibility: ['LIPO', 'GFCO', 'LICO']
+            },
+            'GICO': {
+                name: '夜空の星',
+                tagline: '多くの人に癒しを届ける、優しい輝き',
+                features: [
+                    '自然体の癒し系アイドルスタイル',
+                    '広く多くの人に愛される普遍的な魅力',
+                    'リスナーが自発的に応援してくれる',
+                    '穏やかな雑談がメイン',
+                    'ほどよい距離感を保つ'
+                ],
+                strengths: [
+                    '「頑張ってる感」を出さずに、自然体で愛される稀有な存在',
+                    '幅広い年齢層から支持され、長期的なファンが定着しやすい',
+                    'プレッシャーが少なく、メンタルが安定して配信を続けられる',
+                    '唯一無二の「癒し」ポジションを確立できる',
+                    '時間をかけてじわじわと評価が高まる、持続可能なスタイル'
+                ],
+                weaknesses: [
+                    'ランクが上がらず、「自分は何もできてない」焦燥感',
+                    'イベント時に「お願い」できず、ひたすら申し訳なくなる',
+                    '他の配信者と比較して「私は地味すぎる」と落ち込む',
+                    '「もっと頑張らなきゃ」と思っても、何をすればいいかわからない',
+                    '周りが成長していく中、自分だけ取り残される不安'
+                ],
+                advice: [
+                    '焦らず自分のペースを保つことが、最大の強み',
+                    '「癒し」の価値は数字に表れにくいが、確実に存在すると信じる',
+                    'たまには積極的な一面を見せると、ギャップで更に魅力が増す',
+                    '定期配信で「いつもの星」としてのポジションを確立',
+                    'ランクよりも「必要とされている」実感を大切に'
+                ],
+                rank: 2,
+                difficulty: 2,
+                growth: '大器晩成型',
+                burnout: 1,
+                hardship: 2,
+                goodCompatibility: ['GFCO', 'LICO', 'GIPO'],
+                badCompatibility: ['LIPS', 'LFPO', 'LICS']
+            },
+            'GICS': {
+                name: '秘密の花園',
+                tagline: '選ばれた者だけが見る、美しい世界',
+                features: [
+                    '選民意識を生む特別感のある世界観',
+                    'アイドル的距離感を保ちつつ、選ばれた者には特別',
+                    'マイペースな雑談配信',
+                    '独特の魅力で、ハマる人は深くハマる',
+                    '少数の熱狂的ファンに支えられる'
+                ],
+                strengths: [
+                    '高単価ギフトが集中し、少人数でもランク維持が可能',
+                    '熱狂的な推し活文化が形成され、FANBOX等の課金率が非常に高い',
+                    '「選ばれた」という優越感でファンのロイヤリティが極めて高い',
+                    'ガチャ企画やイベントの進行がスムーズで、毎回完売する',
+                    'ブレない世界観で、長期的に安定したコミュニティが築ける'
+                ],
+                weaknesses: [
+                    'ガチ恋リスナーとの距離感トラブルが発生しやすい',
+                    '新規拡大がほぼ不可能で、成長の限界が明確',
+                    '常連間の嫉妬や競争が激化し、コミュニティ管理が困難',
+                    '1人の離脱が収益に直結し、精神的な依存関係が生まれる',
+                    '閉鎖的すぎて、外部から理解されず孤立する'
+                ],
+                advice: [
+                    '閉鎖的になりすぎず、たまには新しい風を入れる',
+                    '世界観を大切にしつつ、柔軟性も持つ',
+                    '少数のファンへの感謝を忘れず、依存関係にならないよう注意',
+                    'ガチ恋トラブルの兆候を早めにキャッチし、適切な距離を保つ',
+                    '自分の価値を信じ、孤独に強くなる'
+                ],
+                rank: 2,
+                difficulty: 3,
+                growth: '序盤型',
+                burnout: 3,
+                hardship: 2,
+                goodCompatibility: ['GFCS', 'LICS', 'GIPS'],
+                badCompatibility: ['GFPO', 'LFCO', 'LIPO']
+            },
+            'GIPO': {
+                name: 'ヒーロー/ヒロイン',
+                tagline: 'みんなに夢と希望を届ける、正統派アイドル',
+                features: [
+                    '正統派アイドルとして幅広い層から支持',
+                    '企画やイベントに積極的に取り組む',
+                    'リスナーが自然と応援したくなる魅力',
+                    '大勢が少しずつ支えるスタイル',
+                    '新規獲得力が高い'
+                ],
+                strengths: [
+                    'イベント時に大勢が協力してくれて、ランクが安定して上がる',
+                    '多様なリスナー層でリスク分散ができ、経済的に安定',
+                    '新規獲得力が高く、フォロワーが自然に増える',
+                    '「推し」として認識されやすく、ファンアート等の二次創作も生まれる',
+                    '正統派の成功パターンで、長期的に成長できる'
+                ],
+                weaknesses: [
+                    '常に「良い人」でいる疲れが蓄積し、本音が言えなくなる',
+                    'アンチや嫉妬が生まれやすく、メンタルがやられる',
+                    '期待に応えなきゃというプレッシャーで、配信が義務化',
+                    '「この人数、本当に私のこと見てるの?」と孤独を感じる',
+                    '休むことへの罪悪感で、体調を崩しても配信してしまう'
+                ],
+                advice: [
+                    '完璧を求めすぎず、弱い部分も見せて良いと認識する',
+                    '「いい人」キャラに縛られず、時には本音も話す',
+                    'リスナーへの感謝を忘れず、でも依存しすぎない',
+                    '休息をしっかり取り、長期的な視点で活動する',
+                    '自分らしさを失わず、無理のない範囲で頑張る'
+                ],
+                rank: 4,
+                difficulty: 3,
+                growth: '中盤型',
+                burnout: 3,
+                hardship: 3,
+                goodCompatibility: ['GFPO', 'LIPO', 'GICO'],
+                badCompatibility: ['GFCS', 'LICS', 'LFCS']
+            },
+            'GIPS': {
+                name: '高級サロン',
+                tagline: '限られた上顧客に、最高の体験を',
+                features: [
+                    'VIP待遇のような特別感',
+                    '少数の献身的なファンが全てを支える',
+                    '高クオリティな配信と企画',
+                    'アイドル的距離感を保つ',
+                    'プレミアムな雰囲気'
+                ],
+                strengths: [
+                    '少人数でも高ランクを維持でき、コストパフォーマンス最強',
+                    'ファン1人あたりの課金額が桁違いで、収益が非常に安定',
+                    '配信頻度が少なくても許され、プライベート時間を確保できる',
+                    '質の高い企画だけに集中でき、クオリティを追求できる',
+                    '効率的に結果を出せる、スマートな配信スタイル'
+                ],
+                weaknesses: [
+                    '神リスナー1人が離れただけで、枠が崩壊する恐怖',
+                    '「お金で繋がってる関係」という罪悪感に苛まれる',
+                    '常に完璧を求められ、少しのミスも許されないプレッシャー',
+                    'ガチ恋・依存トラブルが深刻化し、逃げ場がなくなる',
+                    '新規が入れず、ファンが高齢化・離脱したら一気に終わる'
+                ],
+                advice: [
+                    'ファンへの依存度を下げるため、少しずつ新規獲得も視野に入れる',
+                    'プレッシャーに負けず、完璧主義になりすぎない',
+                    '「お金の関係」ではなく「特別な絆」と捉え直す',
+                    'ファンへの感謝を形にして伝え、健全な関係を維持',
+                    '自分のペースを保ち、無理しすぎない'
+                ],
+                rank: 4,
+                difficulty: 4,
+                growth: '中盤型',
+                burnout: 4,
+                hardship: 4,
+                goodCompatibility: ['GFPS', 'LIPS', 'GICS'],
+                badCompatibility: ['GFCO', 'LFCO', 'GFPO']
+            },
+            'LFCO': {
+                name: '生徒会長',
+                tagline: '明るく前向きな、みんなの人気者',
+                features: [
+                    '明るく社交的な性格',
+                    '自分から積極的にコミュニケーション',
+                    '新規さんもすぐに打ち解けられる',
+                    '高いトーク力で配信を引っ張る',
+                    '親しみやすいカリスマ性'
+                ],
+                strengths: [
+                    '新規獲得力が非常に高く、フォロワーが自然に増える',
+                    'コミュニケーション能力で、どんな場面も乗り切れる',
+                    'リスナーから信頼され、相談相手としても頼られる',
+                    '人脈が広がり、コラボやイベントの機会が多い',
+                    'ポジティブな雰囲気で、配信全体が明るくなる'
+                ],
+                weaknesses: [
+                    '常に明るくいる疲れが蓄積し、配信が苦痛になる',
+                    '「弱音を吐けない」空気感で、メンタルが追い詰められる',
+                    '雑談メインでギフトが集まらず、ランクが伸び悩む',
+                    '気を使いすぎて、本当の自分が分からなくなる',
+                    'みんなの期待に応えようとして、キャパオーバーになる'
+                ],
+                advice: [
+                    '無理に明るくしすぎず、疲れた時は正直に伝える',
+                    '自分の感情も大切にして、たまには弱音を吐いても良い',
+                    '企画配信も取り入れて、ギフトが集まる工夫をする',
+                    'ON/OFFの切り替えを意識し、配信外では休む',
+                    '完璧な生徒会長である必要はないと認識する'
+                ],
+                rank: 3,
+                difficulty: 2,
+                growth: '序盤型',
+                burnout: 3,
+                hardship: 3,
+                goodCompatibility: ['GFCO', 'LFPO', 'LICO'],
+                badCompatibility: ['GIPS', 'LICS', 'LIPS']
+            },
+            'LFCS': {
+                name: 'パラダイス',
+                tagline: '自分の理想を形にする、マイペースな楽園',
+                features: [
+                    '自分の世界観を大切にする',
+                    '固定メンバーとの深い関係',
+                    'マイペースに楽しむスタイル',
+                    '配信の雰囲気を自分で作る',
+                    '理想のコミュニティを形成'
+                ],
+                strengths: [
+                    'ストレスが非常に少なく、配信が純粋に楽しい',
+                    '自分らしさを100%出せる環境で、長く続けられる',
+                    '固定メンバーとの深い信頼関係が心の支えになる',
+                    '他人と比較せず、マイペースを貫ける精神的な自由',
+                    '「自分の理想」を実現できる満足感'
+                ],
+                weaknesses: [
+                    '成長がほぼ止まり、「このままでいいのか」不安になる',
+                    '閉鎖的で、新規が全く入ってこない',
+                    'わがままに見られ、他のライバーから距離を置かれる',
+                    'ランクが上がらず、焦りだけが募る',
+                    '自己満足になりすぎて、客観性を失う'
+                ],
+                advice: [
+                    'たまには外に目を向けて、新しい刺激を取り入れる',
+                    '月に1回は新規歓迎配信をして、コミュニティに新しい風を',
+                    '自己満足になりすぎず、リスナーの意見も聞く姿勢を持つ',
+                    'マイペースと成長のバランスを考える',
+                    '「成長しなくてもいい」と割り切るなら、それも一つの正解'
+                ],
+                rank: 2,
+                difficulty: 2,
+                growth: '序盤型',
+                burnout: 2,
+                hardship: 2,
+                goodCompatibility: ['GFCS', 'LFPS', 'GICS'],
+                badCompatibility: ['LIPO', 'GFPO', 'LFPO']
+            },
+            'LFPO': {
+                name: '挑戦者',
+                tagline: '常に前進し続ける、熱血冒険者',
+                features: [
+                    '目標志向で常に前向き',
+                    '企画やイベントに積極的',
+                    'フレンドリーで親しみやすい',
+                    '挑戦する姿が魅力',
+                    'エネルギッシュで情熱的'
+                ],
+                strengths: [
+                    'イベントで爆発的に伸び、ランクが急上昇する',
+                    '挑戦する姿が魅力的で、「応援したい」と思わせる力がある',
+                    '目標達成時の喜びが大きく、やりがいを強く感じられる',
+                    '実行力があり、企画がどんどん形になる',
+                    '高い成長性で、短期間で結果を出せる'
+                ],
+                weaknesses: [
+                    '燃え尽き症候群で、イベント後に配信できなくなる',
+                    '失敗時の落ち込みが激しく、立ち直れない',
+                    '常に結果を求められ、休む暇がない',
+                    '「頑張らなきゃ」が呪いになり、配信が苦行化する',
+                    '止まることへの恐怖で、自分を追い込みすぎる'
+                ],
+                advice: [
+                    '無理しすぎず、自分の限界を認識する',
+                    '失敗を恐れず、過程を楽しむ心を持つ',
+                    'イベント後は意識的に休息を取り、燃え尽きを防ぐ',
+                    '完璧でなくても良い、挑戦すること自体が価値',
+                    '「休むこと」も戦略の一つと認識する'
+                ],
+                rank: 4,
+                difficulty: 4,
+                growth: '中盤型',
+                burnout: 4,
+                hardship: 4,
+                goodCompatibility: ['GFPO', 'LFCO', 'LIPO'],
+                badCompatibility: ['GFCS', 'LFCS', 'GICS']
+            },
+            'LFPS': {
+                name: '精鋭ギルド',
+                tagline: '選ばれし仲間と共に、高みを目指す',
+                features: [
+                    '少数精鋭の選抜チーム',
+                    '計画的な目標設定と達成',
+                    'フレンドリーだが戦略的',
+                    'リーダーシップを発揮',
+                    '高い一体感と効率性'
+                ],
+                strengths: [
+                    '強固なチームワークで、困難も乗り越えられる',
+                    '効率的に目標達成でき、無駄がない',
+                    '安定した高額ギフトで、ランクを維持しやすい',
+                    '深い信頼関係が心の支えになる',
+                    '戦略的思考で、計画的に成長できる'
+                ],
+                weaknesses: [
+                    '失敗時、全責任を背負い込んで病む',
+                    'メンバーへの依存度が高すぎて、1人抜けると崩壊',
+                    'プレッシャーで押し潰されそうになる',
+                    '「楽しむ」より「達成」が目的化し、疲弊する',
+                    '新規が入れず、成長の上限が見えている'
+                ],
+                advice: [
+                    'プレッシャーを一人で抱え込まず、メンバーと分かち合う',
+                    '失敗を恐れすぎず、挑戦すること自体を楽しむ',
+                    'たまには目標のない、ただ楽しむだけの配信も入れる',
+                    'メンバーへの感謝を定期的に伝え、絆を強化',
+                    '完璧主義に陥らず、自分にも優しく'
+                ],
+                rank: 4,
+                difficulty: 4,
+                growth: '中盤型',
+                burnout: 4,
+                hardship: 4,
+                goodCompatibility: ['GFPS', 'LFCS', 'LIPS'],
+                badCompatibility: ['GFCO', 'LFCO', 'GFPO']
+            },
+            'LICO': {
+                name: 'アイドル',
+                tagline: '自らの魅力で輝く、王道アイドル',
+                features: [
+                    '自然なカリスマ性',
+                    '幅広い層から支持される',
+                    '高いトーク力',
+                    'アイドル的な距離感を保つ',
+                    'マイペースだが魅力的'
+                ],
+                strengths: [
+                    '幅広い層から安定した支持を受け、ファン層が厚い',
+                    'トーク力で、どんな話題も面白く展開できる',
+                    '「推し」として長期的に応援され、離脱率が低い',
+                    '自然体でいても魅力的に見られる、天性の才能',
+                    'バランスの良いスタイルで、長く続けられる'
+                ],
+                weaknesses: [
+                    '「アイドルらしさ」を求められ、素が出せない',
+                    '雑談だとギフトが集まらず、ランクが伸び悩む',
+                    'アンチや嫉妬も生まれやすく、メンタルがやられる',
+                    '常に「良い顔」を保つ疲れが蓄積する',
+                    '期待に応えるプレッシャーで、配信が義務化'
+                ],
+                advice: [
+                    '完璧なアイドルである必要はない、人間らしさも魅力',
+                    '自分らしさを大切にして、無理しすぎない',
+                    'たまには弱い部分も見せると、ギャップで更に好かれる',
+                    '企画配信も取り入れて、ギフトが集まる工夫をする',
+                    '休息をしっかり取り、長期的な視点で活動'
+                ],
+                rank: 3,
+                difficulty: 3,
+                growth: '中盤型',
+                burnout: 3,
+                hardship: 3,
+                goodCompatibility: ['GICO', 'LFCO', 'LIPO'],
+                badCompatibility: ['GFPS', 'LFPS', 'LIPS']
+            },
+            'LICS': {
+                name: 'カリスマ',
+                tagline: '独自の世界観で、コアなファンを虜にする',
+                features: [
+                    '強烈な個性と世界観',
+                    '配信を完全にコントロール',
+                    '選ばれし者のコミュニティ',
+                    '雑談中心だが圧倒的存在感',
+                    '一定の距離感を保つ'
+                ],
+                strengths: [
+                    '唯一無二のポジションで、競合がいない',
+                    'コアファンの熱量が異常に高く、課金額も桁違い',
+                    'ブレない世界観で、長期的に安定して支持される',
+                    '高い魅力と吸引力で、ハマる人は深くハマる',
+                    '自分らしさを100%出せる、ストレスフリーな環境'
+                ],
+                weaknesses: [
+                    '理解されず、孤立しやすい',
+                    '新規が全く定着せず、成長が止まる',
+                    '「自分は普通じゃない」孤独感に苛まれる',
+                    'カリスマ性を保つプレッシャーが重い',
+                    '閉鎖的で、外部との交流が難しい'
+                ],
+                advice: [
+                    '世界観を大切にしつつ、柔軟性も持つ',
+                    '孤独に強くなり、理解されないことを受け入れる',
+                    '自分の価値を信じ、ブレない軸を持つ',
+                    'たまには心を開いて、素の自分も見せてみる',
+                    '閉鎖的になりすぎず、新しい出会いも大切に'
+                ],
+                rank: 3,
+                difficulty: 4,
+                growth: '序盤型',
+                burnout: 3,
+                hardship: 3,
+                goodCompatibility: ['GICS', 'LFCS', 'LIPS'],
+                badCompatibility: ['GFPO', 'LFCO', 'GFCO']
+            },
+            'LIPO': {
+                name: 'スーパースター',
+                tagline: '大舞台で輝く、トップアイドル',
+                features: [
+                    '高い自己プロデュース能力',
+                    '企画やイベントに積極的',
+                    '幅広い層から圧倒的支持',
+                    '大勢のファンがいる',
+                    'トップを目指す強い意志'
+                ],
+                strengths: [
+                    'イベントで圧倒的に強く、ランキング上位常連',
+                    '認知度が高く、IRIAM内で有名になれる',
+                    '多様なリスナー層で、収益が非常に安定',
+                    '自己プロデュース能力で、常に進化・成長できる',
+                    '影響力があり、他の配信者からもリスペクトされる'
+                ],
+                weaknesses: [
+                    'プレッシャーが尋常じゃなく、病みやすい',
+                    '常に完璧を求められ、少しのミスも許されない',
+                    'アンチも多く、メンタルが削られる',
+                    '燃え尽きて、ある日突然配信できなくなる',
+                    'トップであり続けるプレッシャーで、休めない'
+                ],
+                advice: [
+                    '完璧を求めすぎず、自分に優しく',
+                    '休息は必須、燃え尽きる前に休む勇気を持つ',
+                    '周りと比較しすぎず、自分のペースも大切に',
+                    'メンタルケアを最優先に、カウンセリングも検討',
+                    '「トップであり続ける」より「長く続ける」視点を'
+                ],
+                rank: 5,
+                difficulty: 5,
+                growth: '中盤型',
+                burnout: 5,
+                hardship: 5,
+                goodCompatibility: ['GIPO', 'LFPO', 'LICO'],
+                badCompatibility: ['GFCS', 'LFCS', 'GICS']
+            },
+            'LIPS': {
+                name: 'レジェンド',
+                tagline: '頂点に君臨する、伝説の配信者',
+                features: [
+                    '圧倒的な実力とカリスマ',
+                    '完璧主義でクオリティ最優先',
+                    '少数精鋭の熱狂的ファン',
+                    '最高品質の配信',
+                    '全てを自己完結できる'
+                ],
+                strengths: [
+                    '少人数でもトップランクを維持できる圧倒的効率',
+                    '高額ギフトが日常で、収益が桁違い',
+                    '業界内での影響力が大きく、リスペクトされる',
+                    '完璧な配信で、他の追随を許さない',
+                    '伝説的な存在として、長く記憶される'
+                ],
+                weaknesses: [
+                    '完璧主義の呪縛で、少しのミスで自己嫌悪に陥る',
+                    'コアファンへの依存度が極限で、1人抜けたら崩壊',
+                    '孤独すぎて、誰にも相談できない',
+                    '病んでも休めず、ある日突然消える危険性',
+                    '「完璧であること」が呪いになり、自分を追い詰める'
+                ],
+                advice: [
+                    '完璧でなくて良い、人間らしさも魅力',
+                    '人に頼ることも必要、一人で抱え込まない',
+                    '孤独を恐れず、でも助けを求める勇気も',
+                    '自分を追い詰めすぎず、休む時は休む',
+                    'メンタルヘルスを最優先に、専門家のサポートも検討'
+                ],
+                rank: 5,
+                difficulty: 5,
+                growth: '大器晩成型',
+                burnout: 5,
+                hardship: 5,
+                goodCompatibility: ['GIPS', 'LFPS', 'LICS'],
+                badCompatibility: ['GFCO', 'LFCO', 'GICO']
+            }
+        };
+
+        let currentQuestion = 0;
+        let answers = {
+            GL: { G: 0, L: 0 },
+            FI: { F: 0, I: 0 },
+            CP: { C: 0, P: 0 },
+            OS: { O: 0, S: 0 }
+        };
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            renderQuestions();
+            updateProgress();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                if (index === 0) questionDiv.classList.add('active');
+
+                questionDiv.innerHTML = `
+                    <div class="question-number">質問 ${index + 1} / ${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((opt, optIndex) => `
+                            <div class="option" onclick="selectOption(${index}, '${opt.value}', this)">
+                                ${opt.text}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function selectOption(questionIndex, value, element) {
+            // 同じ質問の他の選択肢の選択状態を解除
+            const questionDiv = element.closest('.question-container');
+            questionDiv.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // 選択した選択肢をマーク
+            element.classList.add('selected');
+
+            // 回答を記録
+            const axis = questions[questionIndex].axis;
+            const axisKey = axis === 'GL' ? 'GL' : axis === 'FI' ? 'FI' : axis === 'CP' ? 'CP' : 'OS';
+            
+            // 前の回答をクリア
+            Object.keys(answers[axisKey]).forEach(key => {
+                if (answers[axisKey][key] > 0) {
+                    // この質問の前の回答を探して減らす
+                    const prevAnswer = questions[questionIndex].options.find(opt => 
+                        answers[axisKey][opt.value] > 0
+                    );
+                    if (prevAnswer) {
+                        answers[axisKey][prevAnswer.value]--;
+                    }
+                }
+            });
+
+            // 新しい回答を記録
+            answers[axisKey][value]++;
+
+            // 次へボタンを有効化
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            const questionContainers = document.querySelectorAll('.question-container');
+            
+            if (currentQuestion < questions.length - 1) {
+                questionContainers[currentQuestion].classList.remove('active');
+                currentQuestion++;
+                questionContainers[currentQuestion].classList.add('active');
+                updateProgress();
+                
+                // 次の質問がすでに回答済みかチェック
+                const nextSelected = questionContainers[currentQuestion].querySelector('.option.selected');
+                document.getElementById('next-btn').disabled = !nextSelected;
+            } else {
+                // 最後の質問なので結果を表示
+                showResult();
+            }
+
+            // 戻るボタンの表示制御
+            document.getElementById('prev-btn').style.display = currentQuestion > 0 ? 'block' : 'none';
+            
+            // 最後の質問では「次へ」を「結果を見る」に変更
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? '結果を見る' : '次へ';
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                const questionContainers = document.querySelectorAll('.question-container');
+                questionContainers[currentQuestion].classList.remove('active');
+                currentQuestion--;
+                questionContainers[currentQuestion].classList.add('active');
+                updateProgress();
+
+                // 前の質問の回答状態を確認
+                const prevSelected = questionContainers[currentQuestion].querySelector('.option.selected');
+                document.getElementById('next-btn').disabled = !prevSelected;
+                document.getElementById('next-btn').textContent = '次へ';
+            }
+
+            document.getElementById('prev-btn').style.display = currentQuestion > 0 ? 'block' : 'none';
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function calculateResult() {
+            let result = '';
+
+            // 各軸で多い方を選択
+            result += answers.GL.G >= answers.GL.L ? 'G' : 'L';
+            result += answers.FI.F >= answers.FI.I ? 'F' : 'I';
+            result += answers.CP.C >= answers.CP.P ? 'C' : 'P';
+            result += answers.OS.O >= answers.OS.S ? 'O' : 'S';
+
+            return result;
+        }
+
+        function showResult() {
+            const resultType = calculateResult();
+            const data = typeData[resultType];
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').style.display = 'block';
+
+            // 結果の表示
+            document.getElementById('result-code').textContent = resultType;
+            document.getElementById('result-name').textContent = data.name;
+            document.getElementById('result-tagline').textContent = data.tagline;
+
+            // 統計情報
+            const stars = (num) => '★'.repeat(num) + '☆'.repeat(5 - num);
+            document.getElementById('result-stats').innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">ランクの上がりやすさ</div>
+                    <div class="stat-value">${stars(data.rank)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">配信難易度</div>
+                    <div class="stat-value">${stars(data.difficulty)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">成長の速さ</div>
+                    <div class="stat-value">${data.growth}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">病みやすさ</div>
+                    <div class="stat-value">${stars(data.burnout)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">配信の大変さ</div>
+                    <div class="stat-value">${stars(data.hardship)}</div>
+                </div>
+            `;
+
+            // 特徴
+            document.getElementById('result-features').innerHTML = 
+                data.features.map(f => `<li>${f}</li>`).join('');
+
+            // 強み
+            document.getElementById('result-strengths').innerHTML = 
+                data.strengths.map(s => `<li>${s}</li>`).join('');
+
+            // 弱み
+            document.getElementById('result-weaknesses').innerHTML = 
+                data.weaknesses.map(w => `<li>${w}</li>`).join('');
+
+            // アドバイス
+            document.getElementById('result-advice').innerHTML = 
+                data.advice.map(a => `<li>${a}</li>`).join('');
+
+            // 相性
+            const getTypeName = (code) => typeData[code] ? `${code}(${typeData[code].name})` : code;
+            
+            document.getElementById('result-good-compatibility').innerHTML = 
+                data.goodCompatibility.map(c => getTypeName(c)).join('、');
+            
+            document.getElementById('result-bad-compatibility').innerHTML = 
+                data.badCompatibility.map(c => getTypeName(c)).join('、');
+
+            // ページトップにスクロール
+            window.scrollTo(0, 0);
+        }
+    </script>
 </body>
 </html>
