@@ -66,8 +66,8 @@
             h1{ font-size:1.5em; }
             .question-text{ font-size:1.1em; }
             .compatibility{ flex-direction:column; }
-            .result-code{ fontサイズ:2em; }
-            .result-name{ fontサイズ:1.5em; }
+            .result-code{ font-size:2em; }
+            .result-name{ font-size:1.5em; }
         }
         .hidden{ display:none; }
 
@@ -167,7 +167,7 @@
                 </div>
             </div>
 
-            <button class="retry-button" type="button" onclick="window.location.replace('https://rinne-iriam.github.io/IRIAM16Type/')">もう一度診断する</button>        
+            <button class="retry-button" onclick="location.reload()">もう一度診断する</button>
         </div>
     </div>
 
@@ -228,8 +228,8 @@
             ]}
         ];
 
-        /* ==== 全16タイプ定義（あなたの既存定義をフルで置いてください） ==== */
-        const typeData = {
+      
+const typeData = {
             'GFCO': {
                 name: 'ゆるふわ配信',
                 tagline: '居心地だけが武器。でもそれが最強',
@@ -856,8 +856,6 @@
             }
         };
 
-        // 追加：グローバル参照を保証（onclick 経由や他関数からの参照ブレ防止）
-        window.typeData = typeData;
 
         /* ====== 状態 ====== */
         let currentQuestion = 0;
@@ -951,11 +949,11 @@
             return r;
         }
 
-        /* ====== 結果描画（タイプコード指定） ====== */
+        /* ====== 追加：結果描画（タイプコード指定） ====== */
         function showResultFor(resultType){
             const data = (typeData && typeData[resultType]) ? typeData[resultType] : null;
 
-            // 画面切替
+            // 画面状態（ディープリンク時も含めて確実に切替）
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.add('hidden');
             const resultScreen = document.getElementById('result-screen');
@@ -985,18 +983,14 @@
                 document.getElementById('result-good-compatibility').innerHTML = (data.goodCompatibility||[]).map(getTypeName).join('、');
                 document.getElementById('result-bad-compatibility').innerHTML  = (data.badCompatibility ||[]).map(getTypeName).join('、');
 
-                // シェア文（?t=XXXX 直リンク）
-                const deepLink = 'https://rinne-iriam.github.io/IRIAM16Type/?t=' + encodeURIComponent(resultType);
+                // シェア文（?t=XXXX を付けた結果直リンク）
+                const deepLink = `https://rinne-iriam.github.io/IRIAM16Type/?t=${encodeURIComponent(resultType)}`;
                 const oneLine  = (data.features && data.features.length>0) ? data.features[0] : '';
-                const shareTxt =
-                  '[IRIAMライバー16タイプ診断] 結果: ' + resultType + ' ' + (data.name || '') +
-                  ' — ' + (data.tagline || '') +
-                  ' ／ 特徴: ' + (oneLine || '') +
-                  ' ／ 診断結果→ ' + deepLink +
-                  ' #IRIAMライバー16タイプ診断';
+                const shareTxt = `[IRIAMライバー16タイプ診断] 結果: ${resultType} ${data.name} — ${data.tagline} ／ 特徴: ${oneLine} ／ 診断結果→ ${deepLink}`;
                 const shareEl = document.getElementById('share-text');
                 if (shareEl) shareEl.value = shareTxt;
             } else {
+                // データがない場合でも落ちずに表示
                 document.getElementById('result-stats').innerHTML = '';
                 ['features','strengths','weaknesses','advice'].forEach(k=>{
                     const el = document.getElementById('result-'+k); if (el) el.innerHTML='';
@@ -1004,17 +998,13 @@
                 document.getElementById('result-good-compatibility').innerHTML = '';
                 document.getElementById('result-bad-compatibility').innerHTML  = '';
                 const shareEl = document.getElementById('share-text');
-                if (shareEl) {
-                  shareEl.value =
-                    '[IRIAMライバー16タイプ診断] 結果: ' + resultType +
-                    ' ／ 診断結果→ https://rinne-iriam.github.io/IRIAM16Type/?t=' + encodeURIComponent(resultType) +
-                    ' #IRIAMライバー16タイプ診断';
-                }
+                if (shareEl) shareEl.value = `[IRIAMライバー16タイプ診断] 結果: ${resultType} ／ 診断結果→ https://rinne-iriam.github.io/IRIAM16Type/?t=${encodeURIComponent(resultType)}`;
             }
+
             window.scrollTo(0,0);
         }
 
-        /* ====== 結果確定：URLに ?t=XXXX を反映 ====== */
+        /* ====== 既存 showResult を最小変更：URLに ?t=XXXX を付与してから描画 ====== */
         function showResult(){
             const resultType = calculateResult();
             const url = new URL(location.href);
@@ -1048,50 +1038,21 @@
             setTimeout(()=>{ btn.textContent = org; }, 1500);
         }
 
-        /* ====== ディープリンク（?t=XXXX を許容・正規化） ====== */
-        function readParamT(){
-            const url = new URL(location.href);
-            let t = url.searchParams.get('t');
-            if (!t && location.hash) {
-                const m = location.hash.match(/[?&#]t=([^&]+)/i) || location.hash.match(/^#([A-Za-z]{4})$/);
-                if (m) t = decodeURIComponent(m[1]);
-            }
-            if (!t) {
-                const m2 = location.href.match(/[?&#]t=([^&]+)/i);
-                if (m2) t = decodeURIComponent(m2[1]);
-            }
-            t = (t || '').replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toUpperCase();
-            return t;
-        }
-
+        /* ====== 追加：ディープリンク起動（?t=XXXX で直接結果へ） ====== */
         function initDeepLink(){
-            const t = readParamT();
-            const pattern = /^[GL][FI][CP][OS]$/;
-            if (t && pattern.test(t)) {
+            const params = new URLSearchParams(location.search);
+            const t = (params.get('t')||'').toUpperCase();
+            const pattern = /^[GL][FI][CP][OS]$/; // 4文字バリデーション
+            if (t && pattern.test(t) && typeData && typeData[t]){
                 showResultFor(t);
-                const clean = location.origin + location.pathname + '?t=' + encodeURIComponent(t);
-                if (location.href !== clean) {
-                    history.replaceState(null, '', clean);
-                }
             } else {
+                // 通常起動（スタート画面表示）
                 document.getElementById('start-screen').classList.remove('hidden');
                 document.getElementById('quiz-screen').classList.add('hidden');
                 document.getElementById('result-screen').style.display = 'none';
             }
         }
-        // DOM 準備済みでも必ず発火させる
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initDeepLink);
-        } else {
-            initDeepLink();
-        }
-
-        // onclick から呼べるように公開
-        window.startQuiz    = startQuiz;
-        window.prevQuestion = prevQuestion;
-        window.nextQuestion = nextQuestion;
-        window.copyShare    = copyShare;
-        window.selectOption = selectOption;
+        document.addEventListener('DOMContentLoaded', initDeepLink);
     </script>
 </body>
 </html>
