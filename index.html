@@ -167,7 +167,8 @@
                 </div>
             </div>
 
-            <button class="retry-button" type="button" onclick="window.location.replace('https://rinne-iriam.github.io/IRIAM16Type/')">もう一度診断する</button>
+            <button class="retry-button" type="button" onclick="restartQuiz()">もう一度診断する</button>
+
         </div>
     </div>
 
@@ -855,6 +856,32 @@ const typeData = {
                 badCompatibility: ['GFCO', 'LFCO', 'GICO']
             }
         };
+
+        function restartQuiz(){
+          // URL をクリーンに（?t を削除）
+          const clean = location.origin + location.pathname;
+          history.replaceState(null, '', clean);
+        
+          // 状態初期化
+          currentQuestion = 0;
+          for (const k in answers){ for (const kk in answers[k]) answers[k][kk] = 0; }
+          for (const k in answersByQuestion){ delete answersByQuestion[k]; }
+        
+          // 画面を最初の状態へ
+          document.getElementById('quiz-screen').classList.add('hidden');
+          document.getElementById('result-screen').style.display = 'none';
+          document.getElementById('start-screen').classList.remove('hidden');
+        
+          // 進捗と選択をリセット
+          const pf = document.getElementById('progress-fill');
+          if (pf) pf.style.width = '0%';
+          const qc = document.getElementById('questions-container');
+          if (qc) qc.innerHTML = '';
+          const shareEl = document.getElementById('share-text');
+          if (shareEl) shareEl.value = '';
+        
+          window.scrollTo(0,0);
+        }
 
 
         /* ====== 状態 ====== */
