@@ -986,7 +986,12 @@ const typeData = {
                 // シェア文（?t=XXXX を付けた結果直リンク）
                 const deepLink = `https://rinne-iriam.github.io/IRIAM16Type/?t=${encodeURIComponent(resultType)}`;
                 const oneLine  = (data.features && data.features.length>0) ? data.features[0] : '';
-                const shareTxt =`[IRIAMライバー16タイプ診断] 結果: ${resultType} ${data.name} — ${data.tagline} ／ 特徴: ${oneLine} ／ 診断結果→ ${deepLink} #IRIAMライバー16タイプ診断`;
+                const shareTxt =
+                  '[IRIAMライバー16タイプ診断] 結果: ' + resultType + ' ' + (data.name || '') +
+                  ' — ' + (data.tagline || '') +
+                  ' ／ 特徴: ' + (oneLine || '') +
+                  ' ／ 診断結果→ ' + deepLink +
+                  ' #IRIAMライバー16タイプ診断';
                 const shareEl = document.getElementById('share-text');
                 if (shareEl) shareEl.value = shareTxt;
             } else {
@@ -998,8 +1003,12 @@ const typeData = {
                 document.getElementById('result-good-compatibility').innerHTML = '';
                 document.getElementById('result-bad-compatibility').innerHTML  = '';
                 const shareEl = document.getElementById('share-text');
-                if (shareEl)shareEl.value =`[IRIAMライバー16タイプ診断] 結果: ${resultType} ／ 診断結果→ https://rinne-iriam.github.io/IRIAM16Type/?t=${encodeURIComponent(resultType)} #IRIAMライバー16タイプ診断`;
-            }
+                if (shareEl) {
+                  shareEl.value =
+                    '[IRIAMライバー16タイプ診断] 結果: ' + resultType +
+                    ' ／ 診断結果→ https://rinne-iriam.github.io/IRIAM16Type/?t=' + encodeURIComponent(resultType) +
+                    ' #IRIAMライバー16タイプ診断';
+                        }
 
             window.scrollTo(0,0);
         }
