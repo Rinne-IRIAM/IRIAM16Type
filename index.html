@@ -5,395 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IRIAMライバー16タイプ診断</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            line-height: 1.6;
+            font-family:'Segoe UI','Hiragino Sans','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            min-height:100vh; padding:20px; line-height:1.6;
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        .container { max-width:800px; margin:0 auto; }
+        .card { background:white; border-radius:20px; padding:40px; box-shadow:0 20px 60px rgba(0,0,0,.3); margin-bottom:20px; }
+        h1 { color:#667eea; text-align:center; margin-bottom:10px; font-size:2em; }
+        .subtitle { text-align:center; color:#666; margin-bottom:30px; font-size:.9em; }
+        .progress-bar { width:100%; height:8px; background:#e0e0e0; border-radius:10px; margin-bottom:30px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,#667eea 0%,#764ba2 100%); border-radius:10px; transition:width .3s ease; }
+        .question-container{ display:none; }
+        .question-container.active{ display:block; animation:fadeIn .5s ease; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
+        .question-number{ color:#764ba2; font-weight:bold; margin-bottom:10px; }
+        .question-text{ font-size:1.3em; color:#333; margin-bottom:30px; font-weight:500; }
+        .options{ display:flex; flex-direction:column; gap:15px; }
+        .option{ background:#f8f9fa; border:3px solid #e0e0e0; border-radius:12px; padding:20px; cursor:pointer; transition:all .3s ease; font-size:1.1em; }
+        .option:hover{ border-color:#667eea; background:#f0f4ff; transform:translateX(5px); }
+        .option.selected{ border-color:#667eea; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; }
+        .buttons{ display:flex; justify-content:space-between; margin-top:30px; gap:15px; }
+        button{ padding:15px 30px; border:none; border-radius:10px; font-size:1em; cursor:pointer; transition:all .3s ease; font-weight:600; }
+        .btn-primary{ background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; flex:1; }
+        .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 5px 15px rgba(102,126,234,.4); }
+        .btn-secondary{ background:#e0e0e0; color:#666; }
+        .btn-secondary:hover{ background:#d0d0d0; }
+        button:disabled{ opacity:.5; cursor:not-allowed; }
+        #start-screen{text-align:center;}
+        #start-screen h1{ font-size:2.5em; margin-bottom:20px; }
+        #start-screen p{ font-size:1.2em; color:#666; margin-bottom:30px; line-height:1.8; }
+        .start-button{ background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:20px 50px; font-size:1.2em; border:none; border-radius:50px; cursor:pointer; transition:all .3s ease; font-weight:600; }
+        .start-button:hover{ transform:translateY(-3px); box-shadow:0 10px 25px rgba(102,126,234,.4); }
+        #result-screen{ display:none; }
+        .result-type{ text-align:center; margin-bottom:30px; }
+        .result-code{ font-size:3em; color:#667eea; font-weight:bold; margin-bottom:10px; }
+        .result-name{ font-size:2em; color:#333; margin-bottom:10px; }
+        .result-tagline{ font-size:1.2em; color:#764ba2; font-style:italic; }
+        .result-section{ margin-bottom:30px; }
+        .result-section h3{ color:#667eea; margin-bottom:15px; font-size:1.3em; border-left:4px solid #667eea; padding-left:15px; }
+        .result-section ul{ list-style:none; padding-left:0; }
+        .result-section li{ padding:10px 0 10px 25px; position:relative; }
+        .result-section li:before{ content:"▸"; position:absolute; left:0; color:#667eea; }
+        .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:15px; margin-bottom:30px; }
+        .stat-item{ background:#f8f9fa; padding:15px; border-radius:10px; text-align:center; }
+        .stat-label{ font-size:.9em; color:#666; margin-bottom:5px; }
+        .stat-value{ font-size:1.5em; color:#667eea; font-weight:bold; }
+        .compatibility{ display:flex; gap:20px; margin-top:15px; }
+        .compatibility-good,.compatibility-bad{ flex:1; padding:15px; border-radius:10px; }
+        .compatibility-good{ background:#e8f5e9; border-left:4px solid #4caf50; }
+        .compatibility-bad{ background:#ffebee; border-left:4px solid #f44336; }
+        .compatibility h4{ margin-bottom:10px; font-size:1em; }
+        .compatibility-good h4{ color:#2e7d32; }
+        .compatibility-bad h4{ color:#c62828; }
+        .retry-button{ width:100%; padding:15px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; border:none; border-radius:10px; font-size:1.1em; cursor:pointer; transition:all .3s ease; font-weight:600; }
+        .retry-button:hover{ transform:translateY(-2px); box-shadow:0 5px 15px rgba(102,126,234,.4); }
+        @media (max-width:600px){
+            .card{ padding:25px; }
+            h1{ font-size:1.5em; }
+            .question-text{ font-size:1.1em; }
+            .compatibility{ flex-direction:column; }
+            .result-code{ font-size:2em; }
+            .result-name{ font-size:1.5em; }
         }
+        .hidden{ display:none; }
 
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
+        /* ==== 追加: シェア用エリア ==== */
+        .share-box{ display:grid; gap:10px; }
+        .share-textarea{
+            width:100%; min-height:90px; resize:vertical; padding:12px; border:2px solid #e0e0e0;
+            border-radius:10px; font-size:.95em; line-height:1.5; background:#f8f9fa;
         }
-
-        h1 {
-            color: #667eea;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2em;
+        .copy-button{
+            justify-self:end; padding:10px 16px; border-radius:8px;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:#fff; border:none; cursor:pointer; font-weight:600;
         }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 0.9em;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-
-        .question-container {
-            display: none;
-        }
-
-        .question-container.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .question-number {
-            color: #764ba2;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .question-text {
-            font-size: 1.3em;
-            color: #333;
-            margin-bottom: 30px;
-            font-weight: 500;
-        }
-
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .option {
-            background: #f8f9fa;
-            border: 3px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.1em;
-        }
-
-        .option:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-            transform: translateX(5px);
-        }
-
-        .option.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            gap: 15px;
-        }
-
-        button {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            flex: 1;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #666;
-        }
-
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        #start-screen {
-            text-align: center;
-        }
-
-        #start-screen h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-
-        #start-screen p {
-            font-size: 1.2em;
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
-
-        .start-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 50px;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .start-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        #result-screen {
-            display: none;
-        }
-
-        .result-type {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .result-code {
-            font-size: 3em;
-            color: #667eea;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .result-name {
-            font-size: 2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .result-tagline {
-            font-size: 1.2em;
-            color: #764ba2;
-            font-style: italic;
-        }
-
-        .result-section {
-            margin-bottom: 30px;
-        }
-
-        .result-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-            border-left: 4px solid #667eea;
-            padding-left: 15px;
-        }
-
-        .result-section ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .result-section li {
-            padding: 10px 0;
-            padding-left: 25px;
-            position: relative;
-        }
-
-        .result-section li:before {
-            content: "▸";
-            position: absolute;
-            left: 0;
-            color: #667eea;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 1.5em;
-            color: #667eea;
-            font-weight: bold;
-        }
-
-        .compatibility {
-            display: flex;
-            gap: 20px;
-            margin-top: 15px;
-        }
-
-        .compatibility-good, .compatibility-bad {
-            flex: 1;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .compatibility-good {
-            background: #e8f5e9;
-            border-left: 4px solid #4caf50;
-        }
-
-        .compatibility-bad {
-            background: #ffebee;
-            border-left: 4px solid #f44336;
-        }
-
-        .compatibility h4 {
-            margin-bottom: 10px;
-            font-size: 1em;
-        }
-
-        .compatibility-good h4 {
-            color: #2e7d32;
-        }
-
-        .compatibility-bad h4 {
-            color: #c62828;
-        }
-
-        .retry-button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .retry-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        @media (max-width: 600px) {
-            .card {
-                padding: 25px;
-            }
-
-            h1 {
-                font-size: 1.5em;
-            }
-
-            .question-text {
-                font-size: 1.1em;
-            }
-
-            .compatibility {
-                flex-direction: column;
-            }
-
-            .result-code {
-                font-size: 2em;
-            }
-
-            .result-name {
-                font-size: 1.5em;
-            }
-        }
-
-        .hidden {
-            display: none;
-        }
-    
-        /* ==== 追加: シェア用エリアの最小スタイル ==== */
-        .share-box { display: grid; gap: 10px; }
-        .share-textarea {
-            width: 100%;
-            min-height: 90px;
-            resize: vertical;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 0.95em;
-            line-height: 1.5;
-            background: #f8f9fa;
-        }
-        .copy-button {
-            justify-self: end;
-            padding: 10px 16px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .copy-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102,126,234,0.35);
-        }
-        .copy-hint { font-size: 0.85em; color: #666; }
-
+        .copy-button:hover{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(102,126,234,.35); }
+        .copy-hint{ font-size:.85em; color:#666; }
     </style>
 </head>
 <body>
@@ -467,7 +157,6 @@
                 </div>
             </div>
 
-            
             <!-- 追加: この結果をシェアする -->
             <div class="result-section" id="share-section">
                 <h3>この結果をシェアする</h3>
@@ -482,63 +171,64 @@
         </div>
     </div>
 
-    
     <script>
+        /* ===== 質問 ===== */
         const questions = [
             // 第1軸: G/L
-            { axis: 'GL', question: '配信中に技術的なトラブルが起きたとき、どうすることが多い?', options: [
-                { text: 'リスナーに「どうしたらいい?」と相談する', value: 'G' },
-                { text: '自分で調べたり試行錯誤して解決する', value: 'L' }
+            { axis:'GL', question:'配信中に技術的なトラブルが起きたとき、どうすることが多い?', options:[
+                { text:'リスナーに「どうしたらいい?」と相談する', value:'G' },
+                { text:'自分で調べたり試行錯誤して解決する', value:'L' }
             ]},
-            { axis: 'GL', question: 'イベント期間中のギフトについて、自分に近い考えは?', options: [
-                { text: 'リスナーが自然に応援してくれるのを待つ', value: 'G' },
-                { text: '目標を掲げて「一緒に頑張ろう!」と呼びかける', value: 'L' }
+            { axis:'GL', question:'イベント期間中のギフトについて、自分に近い考えは?', options:[
+                { text:'リスナーが自然に応援してくれるのを待つ', value:'G' },
+                { text:'目標を掲げて「一緒に頑張ろう!」と呼びかける', value:'L' }
             ]},
-            { axis: 'GL', question: '配信の雰囲気作りは主に誰が担っていると思う?', options: [
-                { text: 'リスナーのコメントやノリで決まることが多い', value: 'G' },
-                { text: '自分のテンションや話題選びで引っ張っている', value: 'L' }
+            { axis:'GL', question:'配信の雰囲気作りは主に誰が担っていると思う?', options:[
+                { text:'リスナーのコメントやノリで決まることが多い', value:'G' },
+                { text:'自分のテンションや話題選びで引っ張っている', value:'L' }
             ]},
             // 第2軸: F/I
-            { axis: 'FI', question: 'リスナーとの関係性で理想に近いのは?', options: [
-                { text: '友達みたいに気軽に話せる関係', value: 'F' },
-                { text: '憧れや推しとして見てもらえる関係', value: 'I' }
+            { axis:'FI', question:'リスナーとの関係性で理想に近いのは?', options:[
+                { text:'友達みたいに気軽に話せる関係', value:'F' },
+                { text:'憧れや推しとして見てもらえる関係', value:'I' }
             ]},
-            { axis: 'FI', question: '配信外でのリスナーとの交流(SNSのリプライなど)は?', options: [
-                { text: '積極的にカジュアルにやり取りする', value: 'F' },
-                { text: 'ある程度距離を保って対応する', value: 'I' }
+            { axis:'FI', question:'配信外でのリスナーとの交流(SNSのリプライなど)は?', options:[
+                { text:'積極的にカジュアルにやり取りする', value:'F' },
+                { text:'ある程度距離を保って対応する', value:'I' }
             ]},
-            { axis: 'FI', question: '自分の配信での「見せ方」について近いのは?', options: [
-                { text: '等身大の自分を見てもらいたい', value: 'F' },
-                { text: '特別な存在として魅力的に見せたい', value: 'I' }
+            { axis:'FI', question:'自分の配信での「見せ方」について近いのは?', options:[
+                { text:'等身大の自分を見てもらいたい', value:'F' },
+                { text:'特別な存在として魅力的に見せたい', value:'I' }
             ]},
             // 第3軸: C/P
-            { axis: 'CP', question: '普段の配信スタイルで当てはまるのは?', options: [
-                { text: 'その日の気分で自由に雑談する', value: 'C' },
-                { text: '企画やテーマを決めて配信することが多い', value: 'P' }
+            { axis:'CP', question:'普段の配信スタイルで当てはまるのは?', options:[
+                { text:'その日の気分で自由に雑談する', value:'C' },
+                { text:'企画やテーマを決めて配信することが多い', value:'P' }
             ]},
-            { axis: 'CP', question: 'ランクやイベント結果への思いは?', options: [
-                { text: '結果はあまり気にせずマイペースに楽しむ', value: 'C' },
-                { text: '目標を立てて達成を目指したい', value: 'P' }
+            { axis:'CP', question:'ランクやイベント結果への思いは?', options:[
+                { text:'結果はあまり気にせずマイペースに楽しむ', value:'C' },
+                { text:'目標を立てて達成を目指したい', value:'P' }
             ]},
-            { axis: 'CP', question: '配信のクオリティについて、自分に近いのは?', options: [
-                { text: '自然体で、流れに任せた配信が好き', value: 'C' },
-                { text: 'サムネ・音質・構成などこだわって準備する', value: 'P' }
+            { axis:'CP', question:'配信のクオリティについて、自分に近いのは?', options:[
+                { text:'自然体で、流れに任せた配信が好き', value:'C' },
+                { text:'サムネ・音質・構成などこだわって準備する', value:'P' }
             ]},
             // 第4軸: O/S
-            { axis: 'OS', question: '理想的なリスナー層のイメージは?', options: [
-                { text: 'いつも来てくれる固定の仲間たち', value: 'S' },
-                { text: 'たくさんの人に来てもらいたい', value: 'O' }
+            { axis:'OS', question:'理想的なリスナー層のイメージは?', options:[
+                { text:'いつも来てくれる固定の仲間たち', value:'S' },
+                { text:'たくさんの人に来てもらいたい', value:'O' }
             ]},
-            { axis: 'OS', question: '新規リスナー獲得のための活動は?', options: [
-                { text: 'あまりしていない。自分の配信に集中したい', value: 'S' },
-                { text: 'ウェルカム配信やSNS発信を積極的にしている', value: 'O' }
+            { axis:'OS', question:'新規リスナー獲得のための活動は?', options:[
+                { text:'あまりしていない。自分の配信に集中したい', value:'S' },
+                { text:'ウェルカム配信やSNS発信を積極的にしている', value:'O' }
             ]},
-            { axis: 'OS', question: 'ギフトの支え方で実感があるのは?', options: [
-                { text: '特定の常連さんたちが中心に支えてくれている', value: 'S' },
-                { text: '色々な人が少しずつ応援してくれている', value: 'O' }
+            { axis:'OS', question:'ギフトの支え方で実感があるのは?', options:[
+                { text:'特定の常連さんたちが中心に支えてくれている', value:'S' },
+                { text:'色々な人が少しずつ応援してくれている', value:'O' }
             ]}
         ];
 
+      
 const typeData = {
             'GFCO': {
                 name: 'ゆるふわ配信',
@@ -1166,197 +856,203 @@ const typeData = {
             }
         };
 
-        let currentQuestion = 0;
-        const answersByQuestion = {}; // 各質問の選択を保持（軸ごとの集計のズレ防止）
-        let answers = {
-            GL: { G: 0, L: 0 },
-            FI: { F: 0, I: 0 },
-            CP: { C: 0, P: 0 },
-            OS: { O: 0, S: 0 }
-        };
 
-        function startQuiz() {
+        /* ====== 状態 ====== */
+        let currentQuestion = 0;
+        const answersByQuestion = {};
+        let answers = { GL:{G:0,L:0}, FI:{F:0,I:0}, CP:{C:0,P:0}, OS:{O:0,S:0} };
+
+        /* ====== 画面制御 ====== */
+        function startQuiz(){
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('hidden');
             renderQuestions();
             updateProgress();
         }
 
-        function renderQuestions() {
+        function renderQuestions(){
             const container = document.getElementById('questions-container');
             container.innerHTML = '';
             questions.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'question-container' + (index === 0 ? ' active' : '');
-                questionDiv.innerHTML = `
-                    <div class="question-number">質問 ${index + 1} / ${questions.length}</div>
+                const div = document.createElement('div');
+                div.className = 'question-container' + (index===0 ? ' active' : '');
+                div.innerHTML = `
+                    <div class="question-number">質問 ${index+1} / ${questions.length}</div>
                     <div class="question-text">${q.question}</div>
                     <div class="options">
-                        ${q.options.map((opt) => `
-                            <div class="option" data-axis="${q.axis}" data-value="${opt.value}" onclick="selectOption(${index}, '${opt.value}', this)">
-                                ${opt.text}
-                            </div>
+                        ${q.options.map(opt => `
+                            <div class="option" data-axis="${q.axis}" data-value="${opt.value}"
+                                 onclick="selectOption(${index}, '${opt.value}', this)">${opt.text}</div>
                         `).join('')}
-                    </div>
-                `;
-                container.appendChild(questionDiv);
+                    </div>`;
+                container.appendChild(div);
             });
         }
 
-        function selectOption(questionIndex, value, element) {
-            const questionDiv = element.closest('.question-container');
-            questionDiv.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-            element.classList.add('selected');
+        function selectOption(idx, value, el){
+            const qdiv = el.closest('.question-container');
+            qdiv.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
 
-            const axis = questions[questionIndex].axis;
-            // 以前の選択があればカウントを戻す
-            if (answersByQuestion[questionIndex]) {
-                const prevAxis = answersByQuestion[questionIndex].axis;
-                const prevVal = answersByQuestion[questionIndex].value;
-                answers[prevAxis][prevVal] = Math.max(0, (answers[prevAxis][prevVal] || 0) - 1);
+            const axis = questions[idx].axis;
+            if (answersByQuestion[idx]) {
+                const {axis:prevAxis, value:prevVal} = answersByQuestion[idx];
+                answers[prevAxis][prevVal] = Math.max(0,(answers[prevAxis][prevVal]||0)-1);
             }
-            // 新しい選択を記録
-            answersByQuestion[questionIndex] = { axis, value };
-            answers[axis][value] = (answers[axis][value] || 0) + 1;
+            answersByQuestion[idx] = {axis, value};
+            answers[axis][value] = (answers[axis][value]||0) + 1;
 
             document.getElementById('next-btn').disabled = false;
         }
 
-        function nextQuestion() {
-            const questionContainers = document.querySelectorAll('.question-container');
+        function nextQuestion(){
+            const q = document.querySelectorAll('.question-container');
             if (currentQuestion < questions.length - 1) {
-                questionContainers[currentQuestion].classList.remove('active');
+                q[currentQuestion].classList.remove('active');
                 currentQuestion++;
-                questionContainers[currentQuestion].classList.add('active');
+                q[currentQuestion].classList.add('active');
                 updateProgress();
-                const nextSelected = questionContainers[currentQuestion].querySelector('.option.selected');
-                document.getElementById('next-btn').disabled = !nextSelected;
+                const selected = q[currentQuestion].querySelector('.option.selected');
+                document.getElementById('next-btn').disabled = !selected;
             } else {
-                showResult();
+                showResult(); // 最後は結果へ
             }
-            document.getElementById('prev-btn').style.display = currentQuestion > 0 ? 'block' : 'none';
-            document.getElementById('next-btn').textContent = currentQuestion === questions.length - 1 ? '結果を見る' : '次へ';
+            document.getElementById('prev-btn').style.display = currentQuestion>0 ? 'block' : 'none';
+            document.getElementById('next-btn').textContent = currentQuestion === questions.length-1 ? '結果を見る' : '次へ';
         }
 
-        function prevQuestion() {
+        function prevQuestion(){
             if (currentQuestion > 0) {
-                const questionContainers = document.querySelectorAll('.question-container');
-                questionContainers[currentQuestion].classList.remove('active');
+                const q = document.querySelectorAll('.question-container');
+                q[currentQuestion].classList.remove('active');
                 currentQuestion--;
-                questionContainers[currentQuestion].classList.add('active');
+                q[currentQuestion].classList.add('active');
                 updateProgress();
-                const prevSelected = questionContainers[currentQuestion].querySelector('.option.selected');
-                document.getElementById('next-btn').disabled = !prevSelected;
+                const selected = q[currentQuestion].querySelector('.option.selected');
+                document.getElementById('next-btn').disabled = !selected;
                 document.getElementById('next-btn').textContent = '次へ';
             }
-            document.getElementById('prev-btn').style.display = currentQuestion > 0 ? 'block' : 'none';
+            document.getElementById('prev-btn').style.display = currentQuestion>0 ? 'block' : 'none';
         }
 
-        function updateProgress() {
-            const progress = ((currentQuestion + 1) / questions.length) * 100;
+        function updateProgress(){
+            const progress = ((currentQuestion+1) / questions.length) * 100;
             document.getElementById('progress-fill').style.width = progress + '%';
         }
 
-        function calculateResult() {
-            const axes = { GL: 'G', FI: 'F', CP: 'C', OS: 'O' };
-            let result = '';
-            result += (answers.GL.G >= answers.GL.L) ? 'G' : 'L';
-            result += (answers.FI.F >= answers.FI.I) ? 'F' : 'I';
-            result += (answers.CP.C >= answers.CP.P) ? 'C' : 'P';
-            result += (answers.OS.O >= answers.OS.S) ? 'O' : 'S';
-            return result;
+        function calculateResult(){
+            let r = '';
+            r += (answers.GL.G >= answers.GL.L) ? 'G' : 'L';
+            r += (answers.FI.F >= answers.FI.I) ? 'F' : 'I';
+            r += (answers.CP.C >= answers.CP.P) ? 'C' : 'P';
+            r += (answers.OS.O >= answers.OS.S) ? 'O' : 'S';
+            return r;
         }
 
-        function showResult() {
-            const resultType = calculateResult();
+        /* ====== 追加：結果描画（タイプコード指定） ====== */
+        function showResultFor(resultType){
             const data = (typeData && typeData[resultType]) ? typeData[resultType] : null;
 
+            // 画面状態（ディープリンク時も含めて確実に切替）
+            document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.add('hidden');
             const resultScreen = document.getElementById('result-screen');
             resultScreen.style.display = 'block';
 
-            document.getElementById('result-code').textContent = resultType;
+            // ヘッダー
+            document.getElementById('result-code').textContent = resultType || '';
             document.getElementById('result-name').textContent = data ? data.name : '';
             document.getElementById('result-tagline').textContent = data ? data.tagline : '';
 
-            const stars = (num) => '★'.repeat(num) + '☆'.repeat(5 - num);
+            const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
 
-            if (data) {
+            if (data){
                 document.getElementById('result-stats').innerHTML = `
-                    <div class="stat-item">
-                        <div class="stat-label">ランクの上がりやすさ</div>
-                        <div class="stat-value">${stars(data.rank)}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">配信難易度</div>
-                        <div class="stat-value">${stars(data.difficulty)}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">成長の速さ</div>
-                        <div class="stat-value">${data.growth}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">病みやすさ</div>
-                        <div class="stat-value">${stars(data.burnout)}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">配信の大変さ</div>
-                        <div class="stat-value">${stars(data.hardship)}</div>
-                    </div>
+                    <div class="stat-item"><div class="stat-label">ランクの上がりやすさ</div><div class="stat-value">${stars(data.rank)}</div></div>
+                    <div class="stat-item"><div class="stat-label">配信難易度</div><div class="stat-value">${stars(data.difficulty)}</div></div>
+                    <div class="stat-item"><div class="stat-label">成長の速さ</div><div class="stat-value">${data.growth}</div></div>
+                    <div class="stat-item"><div class="stat-label">病みやすさ</div><div class="stat-value">${stars(data.burnout)}</div></div>
+                    <div class="stat-item"><div class="stat-label">配信の大変さ</div><div class="stat-value">${stars(data.hardship)}</div></div>
                 `;
-                document.getElementById('result-features').innerHTML = (data.features || []).map(f => `<li>${f}</li>`).join('');
-                document.getElementById('result-strengths').innerHTML = (data.strengths || []).map(s => `<li>${s}</li>`).join('');
-                document.getElementById('result-weaknesses').innerHTML = (data.weaknesses || []).map(w => `<li>${w}</li>`).join('');
-                document.getElementById('result-advice').innerHTML = (data.advice || []).map(a => `<li>${a}</li>`).join('');
+                document.getElementById('result-features').innerHTML   = (data.features||[]).map(v=>`<li>${v}</li>`).join('');
+                document.getElementById('result-strengths').innerHTML  = (data.strengths||[]).map(v=>`<li>${v}</li>`).join('');
+                document.getElementById('result-weaknesses').innerHTML = (data.weaknesses||[]).map(v=>`<li>${v}</li>`).join('');
+                document.getElementById('result-advice').innerHTML     = (data.advice||[]).map(v=>`<li>${v}</li>`).join('');
 
-                const getTypeName = (code) => (typeData && typeData[code]) ? `${code}(${typeData[code].name})` : code;
-                document.getElementById('result-good-compatibility').innerHTML = (data.goodCompatibility || []).map(c => getTypeName(c)).join('、');
-                document.getElementById('result-bad-compatibility').innerHTML  = (data.badCompatibility  || []).map(c => getTypeName(c)).join('、');
+                const getTypeName = code => (typeData && typeData[code]) ? `${code}(${typeData[code].name})` : code;
+                document.getElementById('result-good-compatibility').innerHTML = (data.goodCompatibility||[]).map(getTypeName).join('、');
+                document.getElementById('result-bad-compatibility').innerHTML  = (data.badCompatibility ||[]).map(getTypeName).join('、');
 
-                // 共有テキスト
-                const featureOneLine = (data.features && data.features.length > 0) ? data.features[0] : '';
-                const share = `[IRIAMライバー16タイプ診断] 結果: ${resultType} ${data.name} — ${data.tagline} ／ 特徴: ${featureOneLine} ／ 診断はこちら→ https://rinne-iriam.github.io/IRIAM16Type/`;
+                // シェア文（?t=XXXX を付けた結果直リンク）
+                const deepLink = `https://rinne-iriam.github.io/IRIAM16Type/?t=${encodeURIComponent(resultType)}`;
+                const oneLine  = (data.features && data.features.length>0) ? data.features[0] : '';
+                const shareTxt = `[IRIAMライバー16タイプ診断] 結果: ${resultType} ${data.name} — ${data.tagline} ／ 特徴: ${oneLine} ／ 診断結果→ ${deepLink}`;
                 const shareEl = document.getElementById('share-text');
-                if (shareEl) shareEl.value = share;
+                if (shareEl) shareEl.value = shareTxt;
             } else {
-                // データが見つからない場合でも画面は出す
+                // データがない場合でも落ちずに表示
                 document.getElementById('result-stats').innerHTML = '';
-                document.getElementById('result-features').innerHTML = '';
-                document.getElementById('result-strengths').innerHTML = '';
-                document.getElementById('result-weaknesses').innerHTML = '';
-                document.getElementById('result-advice').innerHTML = '';
+                ['features','strengths','weaknesses','advice'].forEach(k=>{
+                    const el = document.getElementById('result-'+k); if (el) el.innerHTML='';
+                });
                 document.getElementById('result-good-compatibility').innerHTML = '';
-                document.getElementById('result-bad-compatibility').innerHTML = '';
+                document.getElementById('result-bad-compatibility').innerHTML  = '';
                 const shareEl = document.getElementById('share-text');
-                if (shareEl) shareEl.value = `[IRIAMライバー16タイプ診断] 結果: ${resultType} ／ 診断はこちら→ https://rinne-iriam.github.io/IRIAM16Type/`;
+                if (shareEl) shareEl.value = `[IRIAMライバー16タイプ診断] 結果: ${resultType} ／ 診断結果→ https://rinne-iriam.github.io/IRIAM16Type/?t=${encodeURIComponent(resultType)}`;
             }
-            window.scrollTo(0, 0);
+
+            window.scrollTo(0,0);
         }
 
-        function copyShare() {
+        /* ====== 既存 showResult を最小変更：URLに ?t=XXXX を付与してから描画 ====== */
+        function showResult(){
+            const resultType = calculateResult();
+            const url = new URL(location.href);
+            url.searchParams.set('t', resultType);
+            history.replaceState(null, '', url);
+            showResultFor(resultType);
+        }
+
+        /* ====== クリップボード ====== */
+        function copyShare(){
             const el = document.getElementById('share-text');
             if (!el) return;
             const text = el.value || '';
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => toastCopy()).catch(() => fallbackCopy(el));
+            if (navigator.clipboard && navigator.clipboard.writeText){
+                navigator.clipboard.writeText(text).then(()=>toastCopy()).catch(()=>fallbackCopy(el));
             } else {
                 fallbackCopy(el);
             }
         }
-        function fallbackCopy(el) {
+        function fallbackCopy(el){
             el.select();
             el.setSelectionRange(0, el.value.length);
             const ok = document.execCommand('copy');
             if (ok) toastCopy();
         }
-        function toastCopy() {
+        function toastCopy(){
             const btn = document.querySelector('.copy-button');
             if (!btn) return;
-            const original = btn.textContent;
+            const org = btn.textContent;
             btn.textContent = 'コピーしました';
-            setTimeout(() => { btn.textContent = original; }, 1500);
+            setTimeout(()=>{ btn.textContent = org; }, 1500);
         }
-    </script>
 
+        /* ====== 追加：ディープリンク起動（?t=XXXX で直接結果へ） ====== */
+        function initDeepLink(){
+            const params = new URLSearchParams(location.search);
+            const t = (params.get('t')||'').toUpperCase();
+            const pattern = /^[GL][FI][CP][OS]$/; // 4文字バリデーション
+            if (t && pattern.test(t) && typeData && typeData[t]){
+                showResultFor(t);
+            } else {
+                // 通常起動（スタート画面表示）
+                document.getElementById('start-screen').classList.remove('hidden');
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('result-screen').style.display = 'none';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', initDeepLink);
+    </script>
 </body>
 </html>
